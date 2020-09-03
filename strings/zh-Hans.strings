@@ -1,0 +1,24 @@
+"ALERT_INFO" = "提示";
+"SUCCESS" = "成功";
+"ERROR" = "发生错误";
+"INVALID_VALUE" = "该值无效";
+"OK" = "好";
+"CANCEL" = "取消";
+"COPY" = "复制";
+"COPY_SUCCESS" = "复制成功";
+
+"SUBSTORE" = "SubStore";
+"HOME" = "首页";
+
+"SETTING" = "设置";
+"GENERAL" = "一般";
+"TIPS" = "小贴士";
+"FIRST_SCREEN" = "首屏显示";
+"ADVANCED" = "高级";
+"ENVIRONMENT" = "运行环境";
+"CLEAR_CACHE" = "清除缓存";
+"FINISH" = "完成";
+
+"ABOUT" = "关于";
+"VERSION" = "Version";
+"AUTHOR" = "作者";

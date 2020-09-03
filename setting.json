@@ -1,0 +1,107 @@
+[
+    {
+        "title": "GENERAL",
+        "items": [
+            {
+                "icon": [
+                    "tag.fill",
+                    "#9B59B6"
+                ],
+                "title": "TIPS",
+                "type": "script",
+                "key": "tips",
+                "value": "this.tips()"
+            },
+            {
+                "icon": [
+                    "tv.fill"
+                ],
+                "title": "FIRST_SCREEN",
+                "type": "tab",
+                "key": "general.first_screen",
+                "items": [
+                    "HOME",
+                    "SETTING"
+                ],
+                "value": 0
+            }
+        ]
+    },
+    {
+        "title": "ADVANCED",
+        "items": [
+            {
+                "icon": [
+                    "location.fill",
+                    "#FF9900"
+                ],
+                "title": "ENVIRONMENT",
+                "type": "tab",
+                "key": "advanced.environment",
+                "items": [
+                    "QX",
+                    "Other"
+                ],
+                "value": 1
+            },
+            {
+                "icon": [
+                    "trash",
+                    "#E74C3C"
+                ],
+                "title": "CLEAR_CACHE",
+                "type": "script",
+                "key": "advanced.clear_cache",
+                "value": "this.clear_cache()"
+            }
+        ]
+    },
+    {
+        "title": "ABOUT",
+        "items": [
+            {
+                "icon": [
+                    "/assets/icon/substore.ico",
+                    "white"
+                ],
+                "title": "SUBSTORE",
+                "type": "info",
+                "key": "about.substore",
+                "value": "https://github.com/Peng-YM/Sub-Store"
+            },
+            {
+                "icon": [
+                    "/assets/icon/github.com.jpeg",
+                    "white"
+                ],
+                "title": "Github",
+                "type": "info",
+                "key": "about.github",
+                "value": "https://github.com/ipuppet/BoxJsHelper"
+            },
+            {
+                "icon": [
+                    "person.fill",
+                    "#FF9900"
+                ],
+                "title": "AUTHOR",
+                "type": "info",
+                "key": "about.author",
+                "value": [
+                    "ipuppet",
+                    "https://blog.ipuppet.cn"
+                ]
+            },
+            {
+                "icon": [
+                    "book.fill",
+                    "#A569BD"
+                ],
+                "title": "README",
+                "type": "script",
+                "key": "about.readme",
+                "value": "this.readme()"
+            }
+        ]
+    }
+]
