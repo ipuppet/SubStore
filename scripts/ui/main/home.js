@@ -68,11 +68,9 @@ class HomeUI {
 
     static clear_cache() {
         // 删除旧文件
-        if ($cache.get("statics")) {
-            $file.delete("/assets/dist/css")
-            $file.delete("/assets/dist/js")
-            $file.delete("/assets/dist/fonts")
-        }
+        $file.delete("/assets/dist/css")
+        $file.delete("/assets/dist/js")
+        $file.delete("/assets/dist/fonts")
     }
 
     async get_views() {
