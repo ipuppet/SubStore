@@ -16,14 +16,8 @@ class SettingUI extends BaseUISetting {
         }])
     }
 
-    backup_to_iCloud() {
-    }
-
-    recover_from_iCloud() {
-    }
-
-    clear_cache() {
-        require("./home").clear_cache()
+    clearCache() {
+        require("./home").clearCache()
         $ui.toast($l10n("FINISH"))
     }
 
@@ -32,7 +26,7 @@ class SettingUI extends BaseUISetting {
             title: $l10n("TIPS"),
             message: `运行环境中的QX即Quantumult X
 其他则是指Loon和Surge
-当切换运行环境时，请清除缓存`,
+当切换运行环境时，请清除缓存`
         })
     }
 }

@@ -18,7 +18,7 @@
                 ],
                 "title": "FIRST_SCREEN",
                 "type": "tab",
-                "key": "general.first_screen",
+                "key": "general.firstScreen",
                 "items": [
                     "HOME",
                     "SETTING"
@@ -51,8 +51,8 @@
                 ],
                 "title": "CLEAR_CACHE",
                 "type": "script",
-                "key": "advanced.clear_cache",
-                "value": "this.clear_cache()"
+                "key": "advanced.clearCache",
+                "value": "this.clearCache()"
             }
         ]
     },

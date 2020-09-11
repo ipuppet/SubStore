@@ -3,12 +3,12 @@ class MainUI {
         this.kernel = kernel
     }
 
-    ui_main() {
+    mainUi() {
         const Factory = require("./main/factory")
         new Factory(this.kernel).render()
     }
 
-    ui_today() {
+    todayUi() {
         const TodayUI = require("./today/today")
         new TodayUI(this.kernel).render()
     }
@@ -16,13 +16,13 @@ class MainUI {
     render() {
         switch ($app.env) {
             case $env.app:
-                this.ui_main()
+                this.mainUi()
                 break
             case $env.keyboard:
                 $ui.alert("不要在键盘中使用。。。")
                 break
             case $env.today:
-                this.ui_today()
+                this.todayUi()
                 break
             default:
                 $ui.alert({

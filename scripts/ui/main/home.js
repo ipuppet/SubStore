@@ -7,7 +7,7 @@ class HomeUI {
         }
     }
 
-    async get_static_files(html) {
+    async getStaticFiles(html) {
         const remote = "https://sub-store.vercel.app"
         const local = "/assets/dist"
         let list = html.match(/href=\/([^\s>])*[\s|>]/g).concat(html.match(/src=\/([^\s>])*[\s|>]/g))
@@ -15,10 +15,10 @@ class HomeUI {
             // 格式化链接
             path = path.replace(/(?:[^=]*)=([^\s>]*)[\s|>]/, "$1")
             if (path === "/favicon.ico") continue
-            let local_path = local + path
-            if (!$file.exists(local_path)) {
+            let localPath = local + path
+            if (!$file.exists(localPath)) {
                 // 文件夹不存在则创建文件夹
-                let dir = local_path.slice(0, local_path.lastIndexOf("/"))
+                let dir = localPath.slice(0, localPath.lastIndexOf("/"))
                 if (!$file.exists(dir)) $file.mkdir(dir)
                 // 获取信息
                 let content = await $http.get(remote + path)
@@ -36,10 +36,10 @@ class HomeUI {
                     if (!$file.exists(local + "/fonts")) $file.mkdir(local + "/fonts")
                     for (let font of fonts) {
                         font = font.replace(/\.\.([^\)]*)\)/, "$1")
-                        let content_font = await $http.download(remote + font)
+                        let contentFont = await $http.download(remote + font)
                         // 保存文件
                         $file.write({
-                            data: content_font.data,
+                            data: contentFont.data,
                             path: `${local}${font}`
                         })
                     }
@@ -47,39 +47,39 @@ class HomeUI {
                 // 保存文件
                 $file.write({
                     data: $data({ string: content.data }),
-                    path: local_path
+                    path: localPath
                 })
             }
         }
     }
 
     // 检查是否删除旧文件
-    static is_clear_statics() {
-        if (!$cache.get("update_date")) {
-            $cache.set("update_date", new Date().getTime())
+    static isClearStatics() {
+        if (!$cache.get("updateDate")) {
+            $cache.set("updateDate", new Date().getTime())
             return false
         }
-        if (new Date().getTime() - $cache.get("update_date") > 1000 * 60 * 60) {
-            $cache.set("update_date", new Date().getTime())
+        if (new Date().getTime() - $cache.get("updateDate") > 1000 * 60 * 60) {
+            $cache.set("updateDate", new Date().getTime())
             return true
         }
         return false
     }
 
-    static clear_cache() {
+    static clearCache() {
         // 删除旧文件
         $file.delete("/assets/dist/css")
         $file.delete("/assets/dist/js")
         $file.delete("/assets/dist/fonts")
     }
 
-    async get_views() {
-        if (HomeUI.is_clear_statics()) {
-            HomeUI.clear_cache()
+    async getViews() {
+        if (HomeUI.isClearStatics()) {
+            HomeUI.clearCache()
         }
         let request = await $http.get("https://sub-store.vercel.app")
         let html = request.data
-        await this.get_static_files(html)
+        await this.getStaticFiles(html)
         // 更改获取到的html内的链接
         html = html.replace(/href=\//g, "href=local://assets/dist/")
         html = html.replace(/src=\//g, "src=local://assets/dist/")
