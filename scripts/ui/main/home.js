@@ -1,6 +1,11 @@
 class HomeUI {
     constructor(kernel, factory) {
         this.kernel = kernel
+        if (this.kernel.setting.get("advanced.environment") === 0) {
+            this.kernel.host = "http://localhost:9999"
+        } else {
+            this.kernel.host = "https://sub.store"
+        }
         this.factory = factory
         if (!$file.exists("/assets/dist")) {
             $file.mkdir("/assets/dist")
@@ -16,6 +21,7 @@ class HomeUI {
             path = path.replace(/(?:[^=]*)=([^\s>]*)[\s|>]/, "$1")
             if (path === "/favicon.ico") continue
             let localPath = local + path
+            // 目录不存在则从网络获取
             if (!$file.exists(localPath)) {
                 // 文件夹不存在则创建文件夹
                 let dir = localPath.slice(0, localPath.lastIndexOf("/"))
@@ -53,13 +59,29 @@ class HomeUI {
         }
     }
 
+    async getHtml() {
+        let html
+        if (this.isClearStatics()) {
+            HomeUI.clearCache()
+            let request = await $http.get("https://sub-store.vercel.app")
+            $file.write({
+                data: $data({ string: request.data }),
+                path: "/assets/dist/index.html"
+            })
+            html = request.data
+        } else {
+            html = $file.read("/assets/dist/index.html").string
+        }
+        return html
+    }
+
     // 检查是否删除旧文件
-    static isClearStatics() {
+    isClearStatics() {
         if (!$cache.get("updateDate")) {
             $cache.set("updateDate", new Date().getTime())
             return false
         }
-        if (new Date().getTime() - $cache.get("updateDate") > 1000 * 60 * 60) {
+        if (new Date().getTime() - $cache.get("updateDate") > 1000 * 60 * 60 * 60 * this.kernel.setting.get("advanced.cacheLife")) {
             $cache.set("updateDate", new Date().getTime())
             return true
         }
@@ -71,14 +93,11 @@ class HomeUI {
         $file.delete("/assets/dist/css")
         $file.delete("/assets/dist/js")
         $file.delete("/assets/dist/fonts")
+        $file.delete("/assets/dist/index.html")
     }
 
     async getViews() {
-        if (HomeUI.isClearStatics()) {
-            HomeUI.clearCache()
-        }
-        let request = await $http.get("https://sub-store.vercel.app")
-        let html = request.data
+        let html = await this.getHtml()
         await this.getStaticFiles(html)
         // 更改获取到的html内的链接
         html = html.replace(/href=\//g, "href=local://assets/dist/")
