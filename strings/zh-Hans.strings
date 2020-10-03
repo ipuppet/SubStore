@@ -18,6 +18,17 @@
 "ENVIRONMENT" = "运行环境";
 "CLEAR_CACHE" = "清除缓存";
 "FINISH" = "完成";
+"CACHE_LIFE" = "缓存有效期(day)";
+
+"BACKUP" = "备份";
+"BACKUP_ICLOUD" = "备份到iCloud";
+"RECOVER_ICLOUD" = "从iCloud恢复";
+"ALREADY_HAS_BACKUP" = "已有备份，是否覆盖？";
+"BACKUP_SUCCESS" = "备份成功";
+"BACKUP_ERROR" = "备份失败";
+"RECOVER" = "恢复";
+"RECOVER_SUCCESS" = "恢复成功";
+"RECOVER_ERROR" = "恢复失败";
 
 "ABOUT" = "关于";
 "VERSION" = "Version";

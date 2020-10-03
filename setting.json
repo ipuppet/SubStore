@@ -53,6 +53,39 @@
                 "type": "script",
                 "key": "advanced.clearCache",
                 "value": "this.clearCache()"
+            },
+            {
+                "icon": [
+                    "arrow.2.circlepath"
+                ],
+                "title": "CACHE_LIFE",
+                "type": "number",
+                "key": "advanced.cacheLife",
+                "value": 7
+            }
+        ]
+    },
+    {
+        "title": "BACKUP",
+        "items": [
+            {
+                "icon": [
+                    "icloud.and.arrow.up.fill"
+                ],
+                "title": "BACKUP_ICLOUD",
+                "type": "script",
+                "key": "backup.backup",
+                "value": "this.backupToICloud()"
+            },
+            {
+                "icon": [
+                    "arrow.clockwise.icloud.fill",
+                    "#FFCC33"
+                ],
+                "title": "RECOVER_ICLOUD",
+                "type": "script",
+                "key": "backup.recover",
+                "value": "this.recoverFromICloud()"
             }
         ]
     },
