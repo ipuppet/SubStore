@@ -1,44 +1,49 @@
-const BaseUI = require("/scripts/ui/components/base-ui")
+const BaseView = require("../../../EasyJsBox/src/Foundation/view")
 
-class Factory extends BaseUI {
+class Factory extends BaseView {
     constructor(kernel) {
         super(kernel)
-        this.selectedPage = this.kernel.setting.get("general.firstScreen")
     }
 
     async home() {
         const HomeUI = require("./home")
         let interfaceUi = new HomeUI(this.kernel, this)
-        return this.creator(await interfaceUi.getViews(), 0)
+        return await interfaceUi.getView()
     }
 
     setting() {
-        const SettingUI = require("./setting")
-        let interfaceUi = new SettingUI(this.kernel, this)
-        return this.creator(interfaceUi.getViews(), 1, false)
+        this.kernel.getComponent("Setting").controller.isSecondaryPage(true, () => {
+            $ui.pop()
+        })
+        $ui.push({
+            props: {
+                navBarHidden: true,
+                statusBarStyle: 0
+            },
+            views: this.kernel.getComponent("Setting").view.getViews()
+        })
     }
 
     /**
      * 渲染页面
      */
     async render() {
-        // 视图
-        this.setViews([
-            await this.home(),
-            this.setting()
-        ])
-        // 菜单
-        this.setMenus([
-            {
-                icon: ["house", "house.fill"],
-                title: $l10n("HOME")
+        this.kernel.loading.start()
+        let homeView = await this.home()
+        $ui.render({
+            type: "view",
+            props: {
+                navBarHidden: true,
+                statusBarStyle: 0
             },
-            {
-                icon: "gear",
-                title: $l10n("SETTING")
+            layout: $layout.fill,
+            views: [homeView],
+            events: {
+                ready: () => {
+                    this.kernel.loading.end()
+                }
             }
-        ])
-        super.render()
+        })
     }
 }
 

@@ -1,17 +1,16 @@
 class HomeUI {
     constructor(kernel, factory) {
         this.kernel = kernel
-        if (this.kernel.setting.get("advanced.environment") === 0) {
-            this.kernel.host = "http://localhost:9999"
-        } else {
-            this.kernel.host = "https://sub.store"
-        }
         this.factory = factory
         if (!$file.exists("/assets/dist")) {
             $file.mkdir("/assets/dist")
         }
     }
 
+    /**
+     * 获取页面需要的静态文件
+     * @param {String} html 
+     */
     async getStaticFiles(html) {
         const remote = "https://sub-store.vercel.app"
         const local = "/assets/dist"
@@ -21,7 +20,7 @@ class HomeUI {
             path = path.replace(/(?:[^=]*)=([^\s>]*)[\s|>]/, "$1")
             if (path === "/favicon.ico") continue
             let localPath = local + path
-            // 目录不存在则从网络获取
+            // 目录不存在则从网络获取，存在则无事发生
             if (!$file.exists(localPath)) {
                 // 文件夹不存在则创建文件夹
                 let dir = localPath.slice(0, localPath.lastIndexOf("/"))
@@ -59,7 +58,10 @@ class HomeUI {
         }
     }
 
-    async getHtml() {
+    /**
+     * 获取页面html
+     */
+    async getIndexHtml() {
         let html
         if (!$file.exists("/assets/dist/index.html")) {
             let request = await $http.get("https://sub-store.vercel.app")
@@ -71,10 +73,17 @@ class HomeUI {
         } else {
             html = $file.read("/assets/dist/index.html").string
         }
+        // 获取静态文件
+        await this.getStaticFiles(html)
+        // 更改获取到的html内的链接
+        html = html.replace(/href=\//g, "href=local://assets/dist/")
+        html = html.replace(/src=\//g, "src=local://assets/dist/")
         return html
     }
 
-    // 检查是否删除旧文件
+    /**
+     * 检查缓存是否过期
+     */
     isClearStatics() {
         if (!$cache.get("updateDate")) {
             $cache.set("updateDate", new Date().getTime())
@@ -87,6 +96,9 @@ class HomeUI {
         return false
     }
 
+    /**
+     * 清除缓存
+     */
     static clearCache() {
         // 删除旧文件
         $file.delete("/assets/dist/css")
@@ -95,24 +107,37 @@ class HomeUI {
         $file.delete("/assets/dist/index.html")
     }
 
-    async getViews() {
-        let html = await this.getHtml()
-        await this.getStaticFiles(html)
-        // 更改获取到的html内的链接
-        html = html.replace(/href=\//g, "href=local://assets/dist/")
-        html = html.replace(/src=\//g, "src=local://assets/dist/")
-        return [{
+    async getView() {
+        let html = await this.getIndexHtml()
+        return {
             type: "web",
             props: {
                 html: html,
-                opaque: false
+                opaque: false,
+                allowsNavigation: false,
+                script: () => {
+                    function createNode(string) {
+                        const template = `<div class='child'>${string}</div>`
+                        let tempNode = document.createElement('div')
+                        tempNode.innerHTML = template
+                        return tempNode.firstChild
+                    }
+                    let index = document.querySelector(".v-list--dense").childElementCount
+                    let item = `<div tabindex="${index}" class="v-list-item v-list-item--link theme--dark"><div class="v-list-item__action"><i aria-hidden="true" class="v-icon notranslate material-icons theme--dark">settings</i></div><div class="v-list-item__content"><div class="v-list-item__title">JSBox Setting</div></div></div>`
+                    let node = createNode(item)
+                    node.onclick = () => {
+                        $notify("jsboxSetting")
+                    }
+                    document.querySelector(".v-list--dense").append(node)
+                }
             },
-            layout: (make, view) => {
-                make.top.equalTo(view.super.safeAreaTop)
-                make.width.equalTo(view.super)
-                make.bottom.equalTo(view.super.safeAreaBottom).offset(-50)
-            }
-        }]
+            events: {
+                jsboxSetting: () => {
+                    this.factory.setting()
+                }
+            },
+            layout: $layout.fill
+        }
     }
 }
 

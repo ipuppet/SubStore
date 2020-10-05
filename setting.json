@@ -10,7 +10,7 @@
                 "title": "TIPS",
                 "type": "script",
                 "key": "tips",
-                "value": "this.tips()"
+                "value": "this.controller.tips()"
             },
             {
                 "icon": [
@@ -52,7 +52,7 @@
                 "title": "CLEAR_CACHE",
                 "type": "script",
                 "key": "advanced.clearCache",
-                "value": "this.clearCache()"
+                "value": "this.controller.clearCache()"
             },
             {
                 "icon": [
@@ -75,7 +75,7 @@
                 "title": "BACKUP_ICLOUD",
                 "type": "script",
                 "key": "backup.backup",
-                "value": "this.backupToICloud()"
+                "value": "this.controller.backupToICloud()"
             },
             {
                 "icon": [
@@ -85,7 +85,7 @@
                 "title": "RECOVER_ICLOUD",
                 "type": "script",
                 "key": "backup.recover",
-                "value": "this.recoverFromICloud()"
+                "value": "this.controller.recoverFromICloud()"
             }
         ]
     },
@@ -133,7 +133,7 @@
                 "title": "README",
                 "type": "script",
                 "key": "about.readme",
-                "value": "this.readme()"
+                "value": "this.controller.readme()"
             }
         ]
     }

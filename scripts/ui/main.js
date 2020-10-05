@@ -5,7 +5,8 @@ class MainUI {
 
     mainUi() {
         const Factory = require("./main/factory")
-        new Factory(this.kernel).render()
+        let factory = new Factory(this.kernel).render()
+        this.kernel.factory = factory
     }
 
     todayUi() {
