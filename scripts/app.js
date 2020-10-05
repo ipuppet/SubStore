@@ -127,6 +127,8 @@ class AppKernel extends Kernel {
                                             } else {
                                                 // 完成动画
                                                 this.settingComponent.view.done()
+                                                // 重新启动
+                                                setTimeout(() => { $addin.restart() }, 1000)
                                             }
                                         }
                                     })
