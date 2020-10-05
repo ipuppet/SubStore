@@ -54,7 +54,7 @@ class AppKernel extends Kernel {
             this.settingComponent.view.start()
             const backupAction = () => {
                 $http.get({
-                    url: `${this.kernel.host}/api/storage`,
+                    url: `${this.host}/api/storage`,
                     handler: (resp) => {
                         if (resp.error) {
                             $ui.alert($l10n("BACKUP_ERROR"))
@@ -76,9 +76,7 @@ class AppKernel extends Kernel {
                     actions: [
                         {
                             title: $l10n("OK"),
-                            handler: () => {
-                                backupAction()
-                            }
+                            handler: () => { backupAction() }
                         },
                         {
                             title: $l10n("CANCEL"),
@@ -86,28 +84,26 @@ class AppKernel extends Kernel {
                         }
                     ]
                 })
-            } else {
-                backupAction()
-            }
+            } else { backupAction() }
         }
 
         this.setting.recoverFromICloud = () => {
             this.settingComponent.view.start()
-            $drive.open({
-                handler: data => {
+            const recoverAction = data => {
+                try {
                     let message
-                    let config
+                    if (typeof (data) === "string") {
+                        data = JSON.parse(data)
+                    }
                     try {
-                        config = JSON.parse(data.string)
-                        let subsList = Object.keys(config.subs)
-                        let collectionsList = Object.keys(config.collections)
+                        let subsList = Object.keys(data.subs)
+                        let collectionsList = Object.keys(data.collections)
                         message = "单个订阅：\n"
                         message += subsList.join("\n")
                         message += "\n组合订阅：\n"
                         message += collectionsList.join("\n")
                     } catch (error) {
-                        $ui.alert("无法读取到正确的信息!")
-                        return
+                        throw "无法读取到正确的信息!"
                     }
                     $ui.alert({
                         title: "是否恢复？",
@@ -119,7 +115,7 @@ class AppKernel extends Kernel {
                                     $http.post({
                                         url: `${this.kernel.host}/api/storage`,
                                         header: { "Content-Type": "application/json" },
-                                        body: config,
+                                        body: data,
                                         handler: resp => {
                                             if (resp.error) {
                                                 console.log(resp.error)
@@ -144,8 +140,38 @@ class AppKernel extends Kernel {
                             }
                         ]
                     })
+                } catch (error) {
+                    $ui.alert(error)
+                    this.settingComponent.view.cancel()
+                    return
+                }
+            }
+            $ui.menu({
+                items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("MANUAL_INPUT")],
+                handler: (title, idx) => {
+                    if (idx === 0) {
+                        $drive.open({
+                            handler: data => {
+                                recoverAction(data.string)
+                            }
+                        })
+                    } else if (idx === 1) {
+                        recoverAction($file.read(this.backupPath).string)
+                    } else if (idx === 2) {
+                        $input.text({
+                            placeholder: $l10n("MANUAL_INPUT"),
+                            text: "",
+                            handler: text => {
+                                recoverAction(text.trim())
+                            }
+                        });
+                    }
+                },
+                finished: (cancelled) => {
+                    if (cancelled) this.settingComponent.view.cancel()
                 }
             })
+
         }
     }
 }

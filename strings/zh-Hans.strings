@@ -21,6 +21,9 @@
 "CACHE_LIFE" = "缓存有效期(day)";
 
 "BACKUP" = "备份";
+"CHOOSE_FILE" = "选择文件";
+"DEFAULT_FILE" = "默认文件";
+"MANUAL_INPUT" = "手动输入";
 "BACKUP_ICLOUD" = "备份到iCloud";
 "RECOVER_ICLOUD" = "从iCloud恢复";
 "ALREADY_HAS_BACKUP" = "已有备份，是否覆盖？";
