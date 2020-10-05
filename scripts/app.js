@@ -113,7 +113,7 @@ class AppKernel extends Kernel {
                                 title: $l10n("OK"),
                                 handler: () => {
                                     $http.post({
-                                        url: `${this.kernel.host}/api/storage`,
+                                        url: `${this.host}/api/storage`,
                                         header: { "Content-Type": "application/json" },
                                         body: data,
                                         handler: resp => {
