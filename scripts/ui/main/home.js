@@ -61,8 +61,7 @@ class HomeUI {
 
     async getHtml() {
         let html
-        if (this.isClearStatics()) {
-            HomeUI.clearCache()
+        if (!$file.exists("/assets/dist/index.html")) {
             let request = await $http.get("https://sub-store.vercel.app")
             $file.write({
                 data: $data({ string: request.data }),
