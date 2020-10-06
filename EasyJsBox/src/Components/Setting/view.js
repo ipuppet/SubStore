@@ -743,7 +743,8 @@ class View extends BaseView {
                                         props: {
                                             symbol: "chevron.left",
                                             tintColor: this.textColor,
-                                            bgcolor: $color("clear")
+                                            bgcolor: $color("clear"),
+                                            hidden: this.dataCenter.get("secondaryPage") ? false : true
                                         },
                                         events: {
                                             tapped: () => {
@@ -753,8 +754,8 @@ class View extends BaseView {
                                         layout: (make, view) => {
                                             make.left.inset(10)
                                             make.size.equalTo(30)
-                                            make.top.equalTo(view.super.safeArea)
-                                            make.centerY.equalTo(view.super)
+                                            make.top.equalTo(view.super.safeAreaTop)
+                                            make.bottom.equalTo(view.super)
                                         }
                                     },
                                     {
