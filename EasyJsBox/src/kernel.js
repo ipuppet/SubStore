@@ -82,6 +82,14 @@ class Kernel {
     }
 
     /**
+     * 获取插件
+     * @param {String} plugin 
+     */
+    getPlugin(plugin) {
+        return this.plugins[plugin]
+    }
+
+    /**
      * 渲染页面
      * @return {CallableFunction} 返回值为匿名函数，调用该函数开始渲染页面
      */
