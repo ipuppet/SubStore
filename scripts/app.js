@@ -5,7 +5,7 @@ class AppKernel extends Kernel {
     constructor() {
         super()
         this.settingComponent = this._registerComponent("Setting")
-        this.setting = this.settingComponent.controller.init()
+        this.setting = this.settingComponent.controller
         this.initSettingMethods()
         this.push = this.settingComponent.view.push
         this.loading = this._registerComponent("Loading").controller
