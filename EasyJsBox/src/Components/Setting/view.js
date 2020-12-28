@@ -127,7 +127,7 @@ class View extends BaseView {
         }
     }
 
-    createSwitch(key, icon, title, on = true) {
+    createSwitch(key, icon, title, events) {
         return {
             type: "view",
             views: [
@@ -135,13 +135,15 @@ class View extends BaseView {
                 {
                     type: "switch",
                     props: {
-                        on: on,
+                        on: this.controller.get(key),
                         onColor: $color("#00CC00")
                     },
                     events: {
                         changed: sender => {
                             if (!this.updateSetting(key, sender.on)) {
                                 sender.on = !sender.on
+                            } else {
+                                if (events) eval(`(()=>{return ${events}})()`)
                             }
                         }
                     },
@@ -155,7 +157,7 @@ class View extends BaseView {
         }
     }
 
-    createString(key, icon, title, text = "") {
+    createString(key, icon, title, events) {
         return {
             type: "view",
             views: [
@@ -180,7 +182,7 @@ class View extends BaseView {
                                         props: {
                                             id: key,
                                             align: $align.left,
-                                            text: text
+                                            text: this.controller.get(key)
                                         },
                                         layout: make => {
                                             make.left.right.inset(10)
@@ -205,6 +207,7 @@ class View extends BaseView {
                                             tapped: () => {
                                                 if (this.updateSetting(key, $(key).text)) {
                                                     popover.dismiss()
+                                                    if (events) eval(`(()=>{return ${events}})()`)
                                                 }
                                             }
                                         }
@@ -215,7 +218,7 @@ class View extends BaseView {
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.prev)
-                        make.right.inset(15)
+                        make.right.inset(0)
                         make.size.equalTo(50)
                     }
                 }
@@ -224,7 +227,7 @@ class View extends BaseView {
         }
     }
 
-    createNumber(key, icon, title, number = "") {
+    createNumber(key, icon, title, events) {
         return {
             type: "view",
             views: [
@@ -234,13 +237,13 @@ class View extends BaseView {
                     props: {
                         id: key,
                         align: $align.right,
-                        text: number
+                        text: this.controller.get(key)
                     },
                     events: {
                         tapped: () => {
                             $input.text({
                                 type: $kbType.number,
-                                text: number,
+                                text: this.controller.get(key),
                                 placeholder: title,
                                 handler: (text) => {
                                     const isNumber = (str) => {
@@ -253,6 +256,7 @@ class View extends BaseView {
                                     }
                                     if (this.updateSetting(key, text)) {
                                         $(key).text = text
+                                        if (events) eval(`(()=>{return ${events}})()`)
                                     }
                                 }
                             })
@@ -270,7 +274,7 @@ class View extends BaseView {
         }
     }
 
-    createStepper(key, icon, title, value = 1, min = 1, max = 12) {
+    createStepper(key, icon, title, min, max, events) {
         return {
             type: "view",
             views: [
@@ -279,7 +283,7 @@ class View extends BaseView {
                     type: "label",
                     props: {
                         id: key,
-                        text: value,
+                        text: this.controller.get(key),
                         textColor: this.textColor,
                         align: $align.left
                     },
@@ -293,13 +297,15 @@ class View extends BaseView {
                     props: {
                         min: min,
                         max: max,
-                        value: value
+                        value: this.controller.get(key)
                     },
                     events: {
                         changed: (sender) => {
                             $(key).text = sender.value
                             if (!this.updateSetting(key, sender.value)) {
                                 $(key).text = this.controller.get(key)
+                            } else {
+                                if (events) eval(`(()=>{return ${events}})()`)
                             }
                         }
                     },
@@ -403,21 +409,37 @@ class View extends BaseView {
         }
     }
 
-    createScript(icon, title, script) {
-        let id = `script-${title}`
+    createScript(key, icon, title, script) {
+        let id = `script-${this.dataCenter.get("name")}-${key}`
+        let touchHighlightStart = () => {
+            $(`${id}-line`).bgcolor = $color("insetGroupedBackground")
+        }
+        let touchHighlightEnd = (duration = 0.2) => {
+            $ui.animate({
+                duration: duration,
+                animation: () => {
+                    $(`${id}-line`).bgcolor = $color("clear")
+                }
+            })
+        }
+        let touchHighlight = () => {
+            touchHighlightStart()
+            touchHighlightEnd(0.5)
+        }
         let actionStart = () => {
             // 隐藏button，显示spinner
             $(id).alpha = 0
-            $(`script-spinner-${id}`).alpha = 1
+            $(`${id}-spinner`).alpha = 1
+            touchHighlightStart()
         }
-
         let actionCancel = () => {
             $(id).alpha = 1
-            $(`script-spinner-${id}`).alpha = 0
+            $(`${id}-spinner`).alpha = 0
+            touchHighlightEnd()
         }
-
         let actionDone = (status = true, message = $l10n("ERROR")) => {
-            $(`script-spinner-${id}`).alpha = 0
+            $(`${id}-spinner`).alpha = 0
+            touchHighlightEnd()
             let button = $(id)
             if (!status) { // 失败
                 $ui.toast(message)
@@ -457,6 +479,7 @@ class View extends BaseView {
         }
         return {
             type: "view",
+            props: { id: `${id}-line` },
             views: [
                 this.createLineLabel(title, icon),
                 {
@@ -478,7 +501,7 @@ class View extends BaseView {
                         {
                             type: "spinner",
                             props: {
-                                id: `script-spinner-${id}`,
+                                id: `${id}-spinner`,
                                 loading: true,
                                 alpha: 0
                             },
@@ -492,11 +515,16 @@ class View extends BaseView {
                             events: {
                                 tapped: () => {
                                     // 生成开始事件和结束事件动画，供函数调用
-                                    this.start = actionStart
-                                    this.cancel = actionCancel
-                                    this.done = actionDone
+                                    const animate = {
+                                        actionStart: actionStart,
+                                        actionCancel: actionCancel,
+                                        actionDone: actionDone,
+                                        touchHighlight: touchHighlight,
+                                        touchHighlightStart: touchHighlightStart,
+                                        touchHighlightEnd: touchHighlightEnd
+                                    }
                                     // 执行代码
-                                    eval(script)
+                                    eval(`(()=>{return ${script}(animate)})()`)
                                 }
                             },
                             layout: (make, view) => {
@@ -516,10 +544,7 @@ class View extends BaseView {
         }
     }
 
-    createTab(key, icon, title, items, value) {
-        for (let i = 0; i < items.length; i++) {
-            items[i] = $l10n(items[i])
-        }
+    createTab(key, icon, title, items, events, withTitle) {
         return {
             type: "view",
             views: [
@@ -528,7 +553,7 @@ class View extends BaseView {
                     type: "tab",
                     props: {
                         items: items,
-                        index: value,
+                        index: this.controller.get(key),
                         dynamicWidth: true
                     },
                     layout: (make, view) => {
@@ -537,7 +562,9 @@ class View extends BaseView {
                     },
                     events: {
                         changed: (sender) => {
-                            this.updateSetting(key, sender.index)
+                            let value = withTitle ? [sender.index, title] : sender.index
+                            this.updateSetting(key, value)
+                            if (events) eval(`(()=>{return ${events}})()`)
                         }
                     }
                 }
@@ -546,7 +573,7 @@ class View extends BaseView {
         }
     }
 
-    createColor(key, icon, title, value) {
+    createColor(key, icon, title, events) {
         return {
             type: "view",
             views: [
@@ -554,62 +581,63 @@ class View extends BaseView {
                 {
                     type: "view",
                     views: [
-                        {// 仅用于显示图片
+                        {// 颜色预览以及按钮功能
                             type: "view",
                             props: {
-                                id: `setting-color-${key}`,
-                                bgcolor: $color(value),
+                                id: `setting-${this.dataCenter.get("name")}-color-${key}`,
+                                bgcolor: $color(this.controller.get(key)),
                                 circular: true
+                            },
+                            events: {
+                                tapped: async () => {
+                                    if (typeof $picker.color === "function") {
+                                        const newColor = await $picker.color({ color: $color(this.controller.get(key).trim()) })
+                                        this.updateSetting(key, newColor.hexCode)
+                                        if (events) eval(`(()=>{return ${events}})()`)
+                                        $(`setting-${this.dataCenter.get("name")}-color-${key}`).bgcolor = $color(newColor.hexCode)
+                                    } else {
+                                        const Palette = (this.controller.kernel.getPlugin("palette").plugin)
+                                        let palette = new Palette()
+                                        let color = this.controller.get(key).trim()
+                                        if (typeof color === "string" && color !== "") {
+                                            color = $color(color)
+                                        } else {
+                                            color = $(`setting-${this.dataCenter.get("name")}-color-${key}`).bgcolor
+                                        }
+                                        let navButtons = [
+                                            {
+                                                type: "button",
+                                                props: {
+                                                    symbol: "checkmark",
+                                                    tintColor: this.textColor,
+                                                    bgcolor: $color("clear")
+                                                },
+                                                layout: make => {
+                                                    make.right.inset(10)
+                                                    make.size.equalTo(20)
+                                                },
+                                                events: {
+                                                    tapped: () => {
+                                                        let rgb = palette.rgb
+                                                        let newColor = Palette.RGB2HEX(rgb[0], rgb[1], rgb[2])
+                                                        this.updateSetting(key, newColor)
+                                                        if (events) eval(`(()=>{return ${events}})()`)
+                                                        $(`setting-${this.dataCenter.get("name")}-color-${key}`).bgcolor = $color(newColor)
+                                                        $ui.pop()
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                        palette.setRGB(color.components.red, color.components.green, color.components.blue)
+                                        let views = [palette.getView()]
+                                        this.push(views, $l10n("COLOR"), $l10n("BACK"), navButtons)
+                                    }
+                                }
                             },
                             layout: (make, view) => {
                                 make.centerY.equalTo(view.super)
                                 make.right.inset(0)
                                 make.size.equalTo(20)
-                            }
-                        },
-                        {// 覆盖在图片上监听点击动作
-                            type: "view",
-                            events: {
-                                tapped: () => {
-                                    const Palette = (this.controller.kernel.getPlugin("palette").plugin)
-                                    let palette = new Palette()
-                                    let color = this.controller.get(key).trim()
-                                    if (typeof color === "string" && color !== "") {
-                                        color = $color(color)
-                                    } else {
-                                        color = $(`setting-color-${key}`).bgcolor
-                                    }
-                                    let navButtons = [
-                                        {
-                                            type: "button",
-                                            props: {
-                                                symbol: "checkmark",
-                                                tintColor: this.textColor,
-                                                bgcolor: $color("clear")
-                                            },
-                                            layout: make => {
-                                                make.right.inset(10)
-                                                make.size.equalTo(20)
-                                            },
-                                            events: {
-                                                tapped: () => {
-                                                    let rgb = palette.rgb
-                                                    let newColor = Palette.RGB2HEX(rgb[0], rgb[1], rgb[2])
-                                                    this.updateSetting(key, newColor)
-                                                    $(`setting-color-${key}`).bgcolor = $color(newColor)
-                                                    $ui.pop()
-                                                }
-                                            }
-                                        }
-                                    ]
-                                    palette.setRGB(color.components.red, color.components.green, color.components.blue)
-                                    let views = [palette.getView()]
-                                    this.push(views, $l10n("BACK"), navButtons)
-                                }
-                            },
-                            layout: (make, view) => {
-                                make.right.inset(0)
-                                make.size.equalTo(view.super)
                             }
                         }
                     ],
@@ -624,31 +652,205 @@ class View extends BaseView {
         }
     }
 
-    getViews() {
-        let header = this.headerTitle("setting-title", $l10n("SETTING"))
-        let footer = {
+    createMenu(key, icon, title, items, events, withTitle) {
+        let id = `setting-menu-${this.dataCenter.get("name")}-${key}`
+        return {
             type: "view",
-            props: { height: 130 },
+            props: { id: `${id}-line` },
             views: [
+                this.createLineLabel(title, icon),
                 {
-                    type: "label",
-                    props: {
-                        font: $font(14),
-                        text: `${$l10n("VERSION")} ${this.info.version} © ${this.info.author}`,
-                        textColor: $color({
-                            light: "#C0C0C0",
-                            dark: "#545454"
-                        }),
-                        align: $align.center
-                    },
-                    layout: make => {
-                        make.left.right.inset(0)
-                        make.top.inset(10)
+                    type: "view",
+                    views: [
+                        {
+                            type: "label",
+                            props: {
+                                text: withTitle ? items[(() => {
+                                    let value = this.controller.get(key)
+                                    if (typeof value === "object") return value[0]
+                                    else return value
+                                })()] : items[this.controller.get(key)],
+                                color: $color("secondaryText"),
+                                id: id
+                            },
+                            layout: (make, view) => {
+                                make.right.inset(0)
+                                make.height.equalTo(view.super)
+                            }
+                        }
+                    ],
+                    layout: (make, view) => {
+                        make.right.inset(15)
+                        make.height.equalTo(50)
+                        make.width.equalTo(view.super)
                     }
                 }
-            ]
+            ],
+            events: {
+                tapped: () => {
+                    $(`${id}-line`).bgcolor = $color("insetGroupedBackground")
+                    $ui.menu({
+                        items: items,
+                        handler: (title, idx) => {
+                            let value = withTitle ? [idx, title] : idx
+                            this.updateSetting(key, value)
+                            if (events) eval(`(()=>{return ${events}})()`)
+                            $(id).text = $l10n(title)
+                        },
+                        finished: () => {
+                            $ui.animate({
+                                duration: 0.2,
+                                animation: () => {
+                                    $(`${id}-line`).bgcolor = $color("clear")
+                                }
+                            })
+                        }
+                    })
+                }
+            },
+            layout: $layout.fill
         }
-        return this.standardList(header, footer, this.getSections())
+    }
+
+    createDate(key, icon, title, mode = 2, events) {
+        let id = `setting-date-${this.dataCenter.get("name")}-${key}`
+        const getFormatDate = date => {
+            let str = ""
+            if (typeof date === "number") date = new Date(date)
+            switch (mode) {
+                case 0:
+                    str = date.toLocaleTimeString()
+                    break
+                case 1:
+                    str = date.toLocaleDateString()
+                    break
+                case 2:
+                    str = date.toLocaleString()
+                    break
+            }
+            return str
+        }
+        return {
+            type: "view",
+            views: [
+                this.createLineLabel(title, icon),
+                {
+                    type: "view",
+                    views: [{
+                        type: "label",
+                        props: {
+                            id: `${id}-label`,
+                            color: $color("secondaryText"),
+                            text: this.controller.get(key) ? getFormatDate(this.controller.get(key)) : "None"
+                        },
+                        layout: (make, view) => {
+                            make.right.inset(0)
+                            make.height.equalTo(view.super)
+
+                        }
+                    }],
+                    events: {
+                        tapped: async () => {
+                            const settingData = this.controller.get(key)
+                            const date = await $picker.date({
+                                props: {
+                                    mode: mode,
+                                    date: settingData ? settingData : new Date()
+                                }
+                            })
+                            if (events) eval(`(()=>{return ${events}})()`)
+                            this.updateSetting(key, date.getTime())
+                            $(`${id}-label`).text = getFormatDate(date)
+                        }
+                    },
+                    layout: (make, view) => {
+                        make.right.inset(15)
+                        make.height.equalTo(50)
+                        make.width.equalTo(view.super)
+                    }
+                }
+            ],
+            layout: $layout.fill
+        }
+    }
+
+    createInput(key, icon, title, events) {
+        let id = `setting-input-${this.dataCenter.get("name")}-${key}`
+        return {
+            type: "view",
+            views: [
+                this.createLineLabel(title, icon),
+                {
+                    type: "view",
+                    views: [{
+                        type: "label",
+                        props: {
+                            id: `${id}-label`,
+                            color: $color("secondaryText"),
+                            text: this.controller.get(key)
+                        },
+                        layout: (make, view) => {
+                            make.right.inset(0)
+                            make.height.equalTo(view.super)
+
+                        }
+                    }],
+                    events: {
+                        tapped: async () => {
+                            $input.text({
+                                text: this.controller.get(key),
+                                placeholder: title,
+                                handler: (text) => {
+                                    if (text === "") {
+                                        $ui.toast($l10n("INVALID_VALUE"))
+                                        return
+                                    }
+                                    if (this.updateSetting(key, text)) {
+                                        $(`${id}-label`).text = text
+                                        if (events) eval(`(()=>{return ${events}})()`)
+                                    }
+                                }
+                            })
+                        }
+                    },
+                    layout: (make, view) => {
+                        make.right.inset(15)
+                        make.height.equalTo(50)
+                        make.width.equalTo(view.super)
+                    }
+                }
+            ],
+            layout: $layout.fill
+        }
+    }
+
+    getView() {
+        let header = this.headerTitle(`setting-title-${this.dataCenter.get("name")}`, $l10n("SETTING"))
+        let footer = this.dataCenter.get("footer")
+        if (!footer)
+            footer = {
+                type: "view",
+                props: { height: 130 },
+                views: [
+                    {
+                        type: "label",
+                        props: {
+                            font: $font(14),
+                            text: `${$l10n("VERSION")} ${this.info.version} © ${this.info.author}`,
+                            textColor: $color({
+                                light: "#C0C0C0",
+                                dark: "#545454"
+                            }),
+                            align: $align.center
+                        },
+                        layout: make => {
+                            make.left.right.inset(0)
+                            make.top.inset(10)
+                        }
+                    }
+                ]
+            }
+        return this.defaultList(header, footer, this.getSections())
     }
 
     getSections() {
@@ -659,30 +861,157 @@ class View extends BaseView {
                 let value = this.controller.get(item.key)
                 let row = null
                 if (!item.icon) item.icon = ["square.grid.2x2.fill", "#00CC00"]
+                if (typeof item.items === "object") item.items = item.items.map(item => $l10n(item))
                 switch (item.type) {
                     case "switch":
-                        row = this.createSwitch(item.key, item.icon, $l10n(item.title), value)
+                        /**
+                         * {
+                                "icon": [
+                                    "archivebox",
+                                    "#336699"
+                                ],
+                                "title": "USE_COMPRESSED_IMAGE",
+                                "type": "switch",
+                                "key": "album.useCompressedImage",
+                                "value": true
+                            }
+                         */
+                        row = this.createSwitch(item.key, item.icon, $l10n(item.title), item.events)
                         break
                     case "stepper":
-                        row = this.createStepper(item.key, item.icon, $l10n(item.title), value, 1, 12)
+                        /**
+                         * {
+                                "icon": [
+                                    "rectangle.split.3x1.fill",
+                                    "#FF6666"
+                                ],
+                                "title": "SWITCH_INTERVAL",
+                                "type": "stepper",
+                                "key": "album.switchInterval",
+                                "min": 10,
+                                "max": 60,
+                                "value": 10
+                            }
+                         */
+                        row = this.createStepper(item.key, item.icon, $l10n(item.title), item.min === undefined ? 1 : item.min, item.max === undefined ? 12 : item.max, item.events)
                         break
                     case "string":
-                        row = this.createString(item.key, item.icon, $l10n(item.title), value)
+                        /**
+                         * {
+                                "icon": [
+                                    "link",
+                                    "#CC6699"
+                                ],
+                                "title": "URL_SCHEME",
+                                "type": "string",
+                                "key": "album.urlScheme",
+                                "value": ""
+                            }
+                         */
+                        row = this.createString(item.key, item.icon, $l10n(item.title), item.events)
                         break
                     case "number":
-                        row = this.createNumber(item.key, item.icon, $l10n(item.title), value)
+                        /**
+                         * {
+                                "icon": [
+                                    "rectangle.split.3x1.fill",
+                                    "#FF6666"
+                                ],
+                                "title": "TIME_SPAN",
+                                "type": "number",
+                                "key": "timeSpan",
+                                "value": 10
+                            }
+                         */
+                        row = this.createNumber(item.key, item.icon, $l10n(item.title), item.events)
                         break
                     case "info":
+                        /**
+                         * {
+                                "icon": [
+                                    "book.fill",
+                                    "#A569BD"
+                                ],
+                                "title": "README",
+                                "type": "script",
+                                "key": "readme",
+                                "value": "this.controller.readme()"
+                            }
+                         */
                         row = this.createInfo(item.icon, $l10n(item.title), value)
                         break
                     case "script":
-                        row = this.createScript(item.icon, $l10n(item.title), value)
+                        /**
+                         * {
+                                "icon": [
+                                    "book.fill",
+                                    "#A569BD"
+                                ],
+                                "title": "README",
+                                "type": "script",
+                                "key": "calendar",
+                                "value": "this.controller.readme"
+                            }
+                         */
+                        row = this.createScript(item.key, item.icon, $l10n(item.title), value)
                         break
                     case "tab":
-                        row = this.createTab(item.key, item.icon, $l10n(item.title), item.items, value)
+                        /**
+                         * {
+                                "icon": [
+                                    "flag.fill",
+                                    "#FFCC00"
+                                ],
+                                "title": "FIRST_DAY_OF_WEEK",
+                                "type": "tab",
+                                "key": "calendar.firstDayOfWeek",
+                                "items": [
+                                    "_SUNDAY",
+                                    "_MONDAY"
+                                ],
+                                "value": 0
+                            }
+                         */
+                        row = this.createTab(item.key, item.icon, $l10n(item.title), item.items, item.events, item.withTitle)
                         break
                     case "color":
-                        row = this.createColor(item.key, item.icon, $l10n(item.title), value)
+                        /**
+                         * {
+                                "icon": [
+                                    "wand.and.rays",
+                                    "orange"
+                                ],
+                                "title": "COLOR_TONE",
+                                "type": "color",
+                                "key": "calendar.colorTone",
+                                "value": "orange"
+                            }
+                         */
+                        row = this.createColor(item.key, item.icon, $l10n(item.title), item.events)
+                        break
+                    case "menu":
+                        /**
+                         * {
+                                "icon": [
+                                    "rectangle.3.offgrid.fill"
+                                ],
+                                "title": "RIGHT",
+                                "type": "menu",
+                                "key": "right",
+                                "items": "this.controller.getMenu",
+                                "value": 0
+                            }
+                         */
+                        if (typeof item.items === "string") {
+                            item.items = eval(`(()=>{return ${item.items}()})()`)
+                        }
+                        row = this.createMenu(item.key, item.icon, $l10n(item.title), item.items, item.events, item.withTitle)
+                        break
+                    case "date":
+                        row = this.createDate(item.key, item.icon, $l10n(item.title), item.mode, item.events)
+                        break
+                    case "input":
+                        row = this.createInput(item.key, item.icon, $l10n(item.title), item.events)
                         break
                     default:
                         continue
@@ -704,7 +1033,7 @@ class View extends BaseView {
      * @param {*} data
      * @param {*} events
      */
-    standardList(header, footer, data, events = {}) {
+    defaultList(header, footer, data, events = {}) {
         let indicatorInsetBottom = this.dataCenter.get("secondaryPage") ? 0 : 50
         return [
             {
@@ -730,7 +1059,7 @@ class View extends BaseView {
                             },
                             events: Object.assign({
                                 didScroll: sender => {
-                                    // 全屏显示视图则关闭动画
+                                    // 若设置了显示为二级页面则关闭动画
                                     if (this.dataCenter.get("secondaryPage")) {
                                         return
                                     }
@@ -784,6 +1113,7 @@ class View extends BaseView {
                         type: "view",
                         props: {
                             id: header.info.id + "-header",
+                            hidden: this.dataCenter.get("secondaryPage") ? true : false,
                             alpha: this.dataCenter.get("secondaryPage") ? 1 : 0
                         },
                         layout: (make, view) => {

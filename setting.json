@@ -10,20 +10,7 @@
                 "title": "TIPS",
                 "type": "script",
                 "key": "tips",
-                "value": "this.controller.tips()"
-            },
-            {
-                "icon": [
-                    "tv.fill"
-                ],
-                "title": "FIRST_SCREEN",
-                "type": "tab",
-                "key": "general.firstScreen",
-                "items": [
-                    "HOME",
-                    "SETTING"
-                ],
-                "value": 0
+                "value": "this.controller.tips"
             }
         ]
     },
@@ -52,7 +39,7 @@
                 "title": "CLEAR_CACHE",
                 "type": "script",
                 "key": "advanced.clearCache",
-                "value": "this.controller.clearCache()"
+                "value": "this.controller.clearCache"
             },
             {
                 "icon": [
@@ -75,7 +62,7 @@
                 "title": "BACKUP_ICLOUD",
                 "type": "script",
                 "key": "backup.backup",
-                "value": "this.controller.backupToICloud()"
+                "value": "this.controller.backupToICloud"
             },
             {
                 "icon": [
@@ -85,7 +72,7 @@
                 "title": "RECOVER_ICLOUD",
                 "type": "script",
                 "key": "backup.recover",
-                "value": "this.controller.recoverFromICloud()"
+                "value": "this.controller.recoverFromICloud"
             }
         ]
     },
@@ -133,7 +120,7 @@
                 "title": "README",
                 "type": "script",
                 "key": "about.readme",
-                "value": "this.controller.readme()"
+                "value": "this.controller.readme"
             }
         ]
     }

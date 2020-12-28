@@ -10,10 +10,9 @@
 "SUBSTORE" = "SubStore";
 "BACK" = "返回";
 
-"SETTING" = "设置";
+"JSBOX_SETTING" = "JSBox 设置";
 "GENERAL" = "一般";
 "TIPS" = "小贴士";
-"FIRST_SCREEN" = "首屏显示";
 "ADVANCED" = "高级";
 "ENVIRONMENT" = "运行环境";
 "CLEAR_CACHE" = "清除缓存";
@@ -24,6 +23,8 @@
 "CHOOSE_FILE" = "选择文件";
 "DEFAULT_FILE" = "默认文件";
 "MANUAL_INPUT" = "手动输入";
+"COPY_TO_CLIPBOARD" = "复制到剪贴板";
+"FILE_NOT_FOUND" = "未找到文件";
 "BACKUP_ICLOUD" = "备份到iCloud";
 "RECOVER_ICLOUD" = "从iCloud恢复";
 "ALREADY_HAS_BACKUP" = "已有备份，是否覆盖？";

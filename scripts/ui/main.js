@@ -9,11 +9,6 @@ class MainUI {
         this.kernel.factory = factory
     }
 
-    todayUi() {
-        const TodayUI = require("./today/today")
-        new TodayUI(this.kernel).render()
-    }
-
     render() {
         switch ($app.env) {
             case $env.app:
@@ -21,9 +16,6 @@ class MainUI {
                 break
             case $env.keyboard:
                 $ui.alert("不要在键盘中使用。。。")
-                break
-            case $env.today:
-                this.todayUi()
                 break
             default:
                 $ui.alert({

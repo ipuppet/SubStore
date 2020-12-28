@@ -1,34 +1,40 @@
 const BaseController = require("../../Foundation/controller")
 
 class Controller extends BaseController {
-    init(settintPath = "/setting.json", savePath = "/assets/setting.json", info) {
-        this.setPath(settintPath, savePath)
-        this.loadConfig()
-        // 默认读取"/config.json"中的内容
-        info = info ? info : JSON.parse($file.read("/config.json"))["info"]
-        this.view.setInfo(info)
+    init(args) {
+        super.init(args)
+        this.args.savePath = this.args.savePath ? this.args.savePath : "/assets/setting.json"
+        this._setName(this.args.savePath.replace("/", "-"))
+        if (this.args.struct) {
+            this.struct = this.args.struct
+        } else {
+            if (!this.args.structPath) this.args.structPath = "/setting.json"
+            this.struct = JSON.parse($file.read(this.args.structPath).string)
+        }
+        this._loadConfig()
+        // 从"/config.json"中读取内容
+        this.view.setInfo(JSON.parse($file.read("/config.json").string)["info"])
         // 是否全屏显示
         this.dataCenter.set("secondaryPage", false)
         // 注册调色板插件
-        this.kernel.registerPlugin("palette")
+        if (typeof $picker.color !== "function")
+            this.kernel.registerPlugin("palette")
         return this
     }
 
     /**
-     * 是否全屏显示
-     * @param {Boolean} secondaryPage 
+     * 设置一个独一无二的名字
+     * @param {String} name 名字
      */
-    isSecondaryPage(secondaryPage, pop) {
-        this.dataCenter.set("secondaryPage", secondaryPage)
-        if (secondaryPage)
-            this.dataCenter.set("pop", pop)
+    _setName(name) {
+        this.dataCenter.set("name", name)
     }
 
-    loadConfig() {
+    _loadConfig() {
         this.setting = {}
         let user = {}
-        if ($file.exists(this.path)) {
-            user = JSON.parse($file.read(this.path))
+        if ($file.exists(this.args.savePath)) {
+            user = JSON.parse($file.read(this.args.savePath).string)
         }
         for (let section of this.struct) {
             for (let item of section.items) {
@@ -37,21 +43,39 @@ class Controller extends BaseController {
         }
     }
 
-    setPath(settintPath, savePath) {
-        this.path = savePath
-        this.struct = JSON.parse($file.read(settintPath))
+    /**
+     * 是否是二级页面
+     * @param {Boolean} secondaryPage 
+     */
+    isSecondaryPage(secondaryPage, pop) {
+        this.dataCenter.set("secondaryPage", secondaryPage)
+        if (secondaryPage)
+            this.dataCenter.set("pop", pop)
+    }
+
+    setFooter(footer) {
+        this.dataCenter.set("footer", footer)
     }
 
     get(key) {
         return this.setting[key]
     }
 
+    /**
+     * 设置一个钩子，在set方法调用时触发
+     * @param {CallableFunction} hook 
+     */
+    setHook(hook) {
+        this.hook = hook
+    }
+
     set(key, value) {
         this.setting[key] = value
         $file.write({
             data: $data({ string: JSON.stringify(this.setting) }),
-            path: this.path
+            path: this.args.savePath
         })
+        if (this.hook) this.hook(key, value)
         return true
     }
 }

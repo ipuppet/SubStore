@@ -4,6 +4,7 @@ class BaseView {
         // 通用样式
         this.blurStyle = $blurStyle.thinMaterial
         this.textColor = $color("primaryText", "secondaryText")
+        this.linkColor = $color("systemLink")
     }
 
     init() { }
@@ -55,82 +56,114 @@ class BaseView {
 
     /**
      * 重新设计$ui.push()
-     * @param {*} views 视图
-     * @param {*} parentTitle 上级目录名称，显示在返回按钮旁边
-     * @param {*} navButtons 右侧按钮，需要自己调整位置
+     * @param {Object} args 参数
+     * {
+            view: [],
+            title: "",
+            parent: "",
+            navButtons: [],
+            hasTopOffset: true,
+            disappeared: () => { },
+        }
      */
-    push(views, parentTitle = $l10n("BACK"), navButtons = []) {
-        navButtons = navButtons.concat([
-            {
-                type: "button",
-                props: {
-                    symbol: "chevron.left",
-                    tintColor: this.textColor,
-                    bgcolor: $color("clear")
-                },
-                layout: make => {
-                    make.left.inset(10)
-                    make.size.equalTo(30)
-                }
-            },
-            {
-                type: "label",
-                props: {
-                    text: parentTitle,
-                    textColor: this.textColor,
-                    font: $font(18)
-                },
-                layout: (make, view) => {
-                    make.height.equalTo(view.prev)
-                    make.left.equalTo(view.prev.right)
-                }
-            },
-            {
-                type: "view",
-                props: {
-                    bgolor: $color("blue")
-                },
-                layout: (make, view) => {
-                    make.height.equalTo(view.prev)
-                    make.width.equalTo(view.prev).offset(20)
-                    make.left.inset(10)
-                },
-                events: {
-                    tapped: () => {
-                        $ui.pop()
-                    }
-                }
-            }
-        ])
+    push(args) {
+        const navTop = 45,
+            view = args.view,
+            title = args.title !== undefined ? args.title : "",
+            parent = args.parent !== undefined ? args.parent : $l10n("BACK"),
+            navButtons = args.navButtons !== undefined ? args.navButtons : [{}, {}],
+            hasTopOffset = args.hasTopOffset !== undefined ? args.hasTopOffset : true,
+            disappeared = args.disappeared !== undefined ? args.disappeared : undefined
         $ui.push({
             props: {
                 navBarHidden: true,
                 statusBarStyle: 0
             },
+            events: {
+                disappeared: () => {
+                    if (disappeared !== undefined) disappeared()
+                },
+                dealloc: () => {
+                    if (disappeared !== undefined) disappeared()
+                }
+            },
             views: [
                 {
                     type: "view",
-                    props: { clipsToBounds: true },
-                    layout: $layout.fillSafeArea,
+                    views: view,
+                    layout: hasTopOffset ? (make, view) => {
+                        make.top.equalTo(view.super.safeAreaTop).offset(navTop)
+                        make.bottom.width.equalTo(view.super)
+                    } : $layout.fill
+                },
+                {
+                    type: "view",
+                    layout: (make, view) => {
+                        make.left.top.right.inset(0)
+                        make.bottom.equalTo(view.super.safeAreaTop).offset(navTop)
+                    },
                     views: [
-                        {
-                            type: "view",
-                            views: navButtons,
+                        { // blur
+                            type: "blur",
+                            props: { style: this.blurStyle },
+                            layout: $layout.fill
+                        },
+                        { // canvas
+                            type: "canvas",
                             layout: (make, view) => {
-                                make.top.inset(20)
-                                make.width.equalTo(view.super)
-                                make.height.equalTo(20)
+                                make.top.equalTo(view.prev.bottom)
+                                make.height.equalTo(1 / $device.info.screen.scale)
+                                make.left.right.inset(0)
+                            },
+                            events: {
+                                draw: (view, ctx) => {
+                                    let width = view.frame.width
+                                    let scale = $device.info.screen.scale
+                                    ctx.strokeColor = $color("gray")
+                                    ctx.setLineWidth(1 / scale)
+                                    ctx.moveToPoint(0, 0)
+                                    ctx.addLineToPoint(width, 0)
+                                    ctx.strokePath()
+                                }
                             }
                         },
-                        {
+                        { // view
                             type: "view",
-                            views: views,
                             layout: (make, view) => {
-                                make.top.equalTo(view.prev).offset(40)
-                                make.width.equalTo(view.super)
-                                make.bottom.equalTo(view.super.safeAreaBottom)
-                            }
-                        }
+                                make.top.equalTo(view.super.safeAreaTop)
+                                make.bottom.width.equalTo(view.super)
+                            },
+                            views: [
+                                { // 返回按钮
+                                    type: "button",
+                                    props: {
+                                        bgcolor: $color("clear"),
+                                        symbol: "chevron.left",
+                                        tintColor: this.linkColor,
+                                        title: ` ${parent}`,
+                                        titleColor: this.linkColor,
+                                        font: $font("bold", 16)
+                                    },
+                                    layout: (make, view) => {
+                                        make.left.inset(10)
+                                        make.centerY.equalTo(view.super)
+                                    },
+                                    events: {
+                                        tapped: () => { $ui.pop() }
+                                    }
+                                },
+                                {
+                                    type: "label",
+                                    props: {
+                                        text: title,
+                                        font: $font("bold", 17)
+                                    },
+                                    layout: (make, view) => {
+                                        make.center.equalTo(view.super)
+                                    }
+                                }
+                            ].concat(navButtons)
+                        },
                     ]
                 }
             ]
@@ -146,24 +179,28 @@ class BaseView {
      *     调用 done() 表明您的操作已经全部完成，默认操作成功完成，播放一个按钮变成对号的动画
      *                 若第一个参数传出false则表示运行出错
      *                 第二个参数为错误原因($ui.toast(message))
+     *      调用 cancel() 表示取消操作
      *     示例：
-     *      (start, done) => {
+     *      (start, done, cancel) => {
      *          start()
      *          const upload = (data) => { return false }
      *          if(upload(data)) { done() }
      *          else { done(false, "Upload Error!") }
      *      }
      */
-    navButton(id, symbol, tapped) {
-        let actionStart = () => {
+    navButton(id, symbol, tapped, hidden) {
+        const actionStart = () => {
             // 隐藏button，显示spinner
-            $(id).alpha = 0
+            let button = $(id)
+            button.alpha = 0
+            button.hidden = true
             $("spinner-" + id).alpha = 1
         }
 
-        let actionDone = (status = true, message = $l10n("ERROR")) => {
+        const actionDone = (status = true, message = $l10n("ERROR")) => {
             $("spinner-" + id).alpha = 0
             let button = $(id)
+            button.hidden = false
             if (!status) { // 失败
                 $ui.toast(message)
                 button.alpha = 1
@@ -200,6 +237,14 @@ class BaseView {
                 }
             })
         }
+
+        const actionCancel = () => {
+            $("spinner-" + id).alpha = 0
+            let button = $(id)
+            button.alpha = 1
+            button.hidden = false
+        }
+
         return {
             type: "view",
             props: { id: id },
@@ -208,18 +253,17 @@ class BaseView {
                     type: "button",
                     props: {
                         id: id,
+                        hidden: hidden,
                         tintColor: this.textColor,
                         symbol: symbol,
                         bgcolor: $color("clear")
                     },
                     events: {
                         tapped: () => {
-                            tapped(actionStart, actionDone)
+                            tapped(actionStart, actionDone, actionCancel)
                         }
                     },
-                    layout: (make, view) => {
-                        make.size.equalTo(view.super)
-                    }
+                    layout: $layout.fill
                 },
                 {
                     type: "spinner",
@@ -228,14 +272,12 @@ class BaseView {
                         loading: true,
                         alpha: 0
                     },
-                    layout: (make, view) => {
-                        make.size.equalTo(view.prev)
-                    }
+                    layout: $layout.fill
                 }
             ],
             layout: (make, view) => {
-                make.size.equalTo(20)
-                if (view.prev) {
+                make.height.equalTo(view.super)
+                if (view.prev && view.prev.id !== "label") {
                     make.right.equalTo(view.prev.left).offset(-20)
                 } else {
                     make.right.inset(20)

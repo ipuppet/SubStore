@@ -1,27 +1,44 @@
-const VERSION = "1.0.0"
+const VERSION = "0.0.1"
 
 const DataCenter = require("./Foundation/data-center")
 
 class Kernel {
     constructor() {
+        this.startTime = new Date()
         this.path = {
             components: "./Components/"
         }
+        this.version = VERSION
         this.components = {}
         this.plugins = {}
+        if ($file.exists("/config.json")) {
+            let config = JSON.parse($file.read("/config.json").string)
+            this.name = config.info.name
+        }
+        this.loadUIKit()
+    }
+
+    loadUIKit() {
+        const BaseView = require("./Foundation/view")
+        this.UIKit = new BaseView()
     }
 
     /**
      * 注册组件
-     * @param {String} component 组件名
+     * @param {*} component 组件名
+     * @param {Object} args 参数
      */
-    _registerComponent(component) {
+    _registerComponent(component, args = {}) {
+        let name
+        if (typeof args === "string") name = args
+        else if (args.name) name = args.name
+        else name = component
         let View = require(`${this.path.components}${component}/view`)
         let Controller = require(`${this.path.components}${component}/controller`)
         // 新实例
         let view = new View(this)
         let controller = new Controller(this)
-        // 相互注入
+        // 关联view和controller
         view.setController(controller)
         controller.setView(view)
         // 加载数据中心
@@ -30,14 +47,14 @@ class Kernel {
         controller.setDataCenter(dataCenter)
         // 初始化
         view.init()
-        controller.init()
+        controller.init(args)
         // 注册到kernel
-        this.components[component] = {
+        this.components[name] = {
             view: view,
             controller: controller,
             dataCenter: dataCenter
         }
-        return this.components[component]
+        return this.components[name]
     }
 
     /**
@@ -114,6 +131,8 @@ class Kernel {
                 type: "view",
                 props: {
                     navBarHidden: true,
+                    titleColor: $color("primaryText"),
+                    barColor: $color("primarySurface"),
                     statusBarStyle: 0
                 },
                 layout: $layout.fill,
@@ -132,12 +151,14 @@ class Kernel {
                         }
                         if (this.orientation !== $device.info.screen.orientation) {
                             this.orientation = $device.info.screen.orientation
+                            let menuView = this.components.Menu.view
+                            let menuDataCenter = this.components.Menu.dataCenter
                             // 更新菜单元素的布局
-                            for (let i = 0; i < this.components.Menu.view.menus.length; i++) {
-                                $(`${this.components.Menu.view.itemIdPrefix}${i}`).updateLayout(this.components.Menu.view.menuLayout.menuItem)
+                            for (let i = 0; i < menuDataCenter.get("menus").length; i++) {
+                                $(`${menuDataCenter.get("itemIdPrefix")}${i}`).remakeLayout(menuView.menuLayout.menuItem)
                             }
                             // 更新菜单栏
-                            $(this.components.Menu.view.id).updateLayout(this.components.Menu.view.menuLayout.menuBar)
+                            $(menuDataCenter.get("id")).remakeLayout(menuView.menuLayout.menuBar)
                         }
                     }
                 }

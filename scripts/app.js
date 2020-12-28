@@ -7,7 +7,6 @@ class AppKernel extends Kernel {
         this.settingComponent = this._registerComponent("Setting")
         this.setting = this.settingComponent.controller
         this.initSettingMethods()
-        this.push = this.settingComponent.view.push
         this.loading = this._registerComponent("Loading").controller
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
@@ -26,69 +25,89 @@ class AppKernel extends Kernel {
      * 注入设置中的脚本类型方法
      */
     initSettingMethods() {
-        this.setting.readme = () => {
+        this.setting.readme = animate => {
+            animate.touchHighlightStart()
             const content = $file.read("/README.md").string
-            this.push([{
-                type: "markdown",
-                props: { content: content },
-                layout: (make, view) => {
-                    make.size.equalTo(view.super)
+            this.UIKit.push({
+                view: [{
+                    type: "markdown",
+                    props: { content: content },
+                    layout: (make, view) => {
+                        make.size.equalTo(view.super)
+                    }
+                }],
+                title: $l10n("README"),
+                disappeared: () => {
+                    animate.touchHighlightEnd()
                 }
-            }])
+            })
         }
 
-        this.setting.clearCache = () => {
-            this.settingComponent.view.start()
+        this.setting.clearCache = animate => {
+            animate.actionStart()
             require("/scripts/ui/main/home").clearCache()
-            this.settingComponent.view.done()
+            animate.actionDone()
         }
 
-        this.setting.tips = () => {
+        this.setting.tips = animate => {
+            animate.touchHighlight()
             $ui.alert({
                 title: $l10n("TIPS"),
                 message: `运行环境中的QX即Quantumult X\n其他则是指Loon和Surge\n当切换运行环境时，请清除缓存`
             })
         }
 
-        this.setting.backupToICloud = () => {
-            this.settingComponent.view.start()
-            const backupAction = () => {
-                $http.get({
-                    url: `${this.host}/api/storage`,
-                    handler: (resp) => {
-                        if (resp.error) {
-                            $ui.alert($l10n("BACKUP_ERROR"))
-                            this.settingComponent.view.cancel()
-                        } else {
-                            $file.write({
-                                data: $data({ string: JSON.stringify(resp.data) }),
-                                path: this.backupPath
-                            })
-                            this.settingComponent.view.done()
+        this.setting.backupToICloud = animate => {
+            animate.actionStart()
+            $ui.menu({
+                items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("COPY_TO_CLIPBOARD")],
+                handler: (title, idx) => {
+                    $http.get({
+                        url: `${this.host}/api/storage`,
+                        handler: (resp) => {
+                            if (resp.error) {
+                                $ui.alert($l10n("BACKUP_ERROR"))
+                                animate.actionCancel()
+                            } else {
+                                const data = JSON.stringify(resp.data)
+                                switch (idx) {
+                                    case 0:
+                                        $drive.save({
+                                            data: $data({ string: data }),
+                                            name: this.backupPath.slice(this.backupPath.lastIndexOf("/") + 1),
+                                            handler: success => {
+                                                if (success) {
+                                                    animate.actionDone()
+                                                } else {
+                                                    animate.actionCancel()
+                                                }
+                                            }
+                                        })
+                                        break
+                                    case 1:
+                                        $file.write({
+                                            data: $data({ string: data }),
+                                            path: this.backupPath
+                                        })
+                                        animate.actionDone()
+                                        break
+                                    case 2:
+                                        $clipboard.text = data
+                                        animate.actionDone()
+                                        break
+                                }
+                            }
                         }
-                    }
-                })
-            }
-            if ($file.exists(this.backupPath)) {
-                $ui.alert({
-                    title: $l10n("BACKUP"),
-                    message: $l10n("ALREADY_HAS_BACKUP"),
-                    actions: [
-                        {
-                            title: $l10n("OK"),
-                            handler: () => { backupAction() }
-                        },
-                        {
-                            title: $l10n("CANCEL"),
-                            handler: () => { this.settingComponent.view.cancel() }
-                        }
-                    ]
-                })
-            } else { backupAction() }
+                    })
+                },
+                finished: (cancelled) => {
+                    if (cancelled) animate.actionCancel()
+                }
+            })
         }
 
-        this.setting.recoverFromICloud = () => {
-            this.settingComponent.view.start()
+        this.setting.recoverFromICloud = animate => {
+            animate.actionStart()
             const recoverAction = data => {
                 try {
                     let message
@@ -123,10 +142,10 @@ class AppKernel extends Kernel {
                                                     title: $l10n("RECOVER_ERROR"),
                                                     message: resp.error.localizedDescription
                                                 })
-                                                this.settingComponent.view.cancel()
+                                                animate.actionCancel()
                                             } else {
                                                 // 完成动画
-                                                this.settingComponent.view.done()
+                                                animate.actionDone()
                                                 // 重新启动
                                                 setTimeout(() => { $addin.restart() }, 1000)
                                             }
@@ -137,14 +156,14 @@ class AppKernel extends Kernel {
                             {
                                 title: $l10n("CANCEL"),
                                 handler: () => {
-                                    this.settingComponent.view.cancel()
+                                    animate.actionCancel()
                                 }
                             }
                         ]
                     })
                 } catch (error) {
                     $ui.alert(error)
-                    this.settingComponent.view.cancel()
+                    animate.actionCancel()
                     return
                 }
             }
@@ -158,7 +177,11 @@ class AppKernel extends Kernel {
                             }
                         })
                     } else if (idx === 1) {
-                        recoverAction($file.read(this.backupPath).string)
+                        if ($file.exists(this.backupPath)) {
+                            recoverAction($file.read(this.backupPath).string)
+                        } else {
+                            $ui.alert("FILE_NOT_FOUND")
+                        }
                     } else if (idx === 2) {
                         $input.text({
                             placeholder: $l10n("MANUAL_INPUT"),
@@ -166,14 +189,13 @@ class AppKernel extends Kernel {
                             handler: text => {
                                 recoverAction(text.trim())
                             }
-                        });
+                        })
                     }
                 },
                 finished: (cancelled) => {
-                    if (cancelled) this.settingComponent.view.cancel()
+                    if (cancelled) animate.actionCancel()
                 }
             })
-
         }
     }
 }

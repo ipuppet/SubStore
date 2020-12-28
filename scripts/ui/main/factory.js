@@ -12,15 +12,13 @@ class Factory extends BaseView {
     }
 
     setting() {
-        this.kernel.getComponent("Setting").controller.isSecondaryPage(true, () => {
+        this.kernel.setting.isSecondaryPage(true, () => {
             $ui.pop()
         })
-        $ui.push({
-            props: {
-                navBarHidden: true,
-                statusBarStyle: 0
-            },
-            views: this.kernel.getComponent("Setting").view.getViews()
+        this.kernel.UIKit.push({
+            view: this.kernel.setting.getView(),
+            title: $l10n("JSBOX_SETTING"),
+            hasTopOffset: false
         })
     }
 

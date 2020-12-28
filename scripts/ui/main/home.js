@@ -20,41 +20,38 @@ class HomeUI {
             path = path.replace(/(?:[^=]*)=([^\s>]*)[\s|>]/, "$1")
             if (path === "/favicon.ico") continue
             let localPath = local + path
-            // 目录不存在则从网络获取，存在则无事发生
-            if (!$file.exists(localPath)) {
-                // 文件夹不存在则创建文件夹
-                let dir = localPath.slice(0, localPath.lastIndexOf("/"))
-                if (!$file.exists(dir)) $file.mkdir(dir)
-                // 获取信息
-                let content = await $http.get(remote + path)
-                let file = path.slice(path.lastIndexOf("/") + 1)
-                // 检查是不是QX
-                if (this.kernel.setting.get("advanced.environment") === 0) {
-                    // 检查是不是 appxxxx.js
-                    if (/^app\.([^\.]*).js$/.test(file)) {
-                        content.data = content.data.replace("https://sub.store", "http://localhost:9999")
-                    }
+            // 文件夹不存在则创建文件夹
+            let dir = localPath.slice(0, localPath.lastIndexOf("/"))
+            if (!$file.exists(dir)) $file.mkdir(dir)
+            // 获取信息
+            let content = await $http.get(remote + path)
+            let file = path.slice(path.lastIndexOf("/") + 1)
+            // 检查是不是QX
+            if (this.kernel.setting.get("advanced.environment") === 0) {
+                // 检查是不是 appxxxx.js
+                if (/^app\.([^\.]*).js$/.test(file)) {
+                    content.data = content.data.replace("https://sub.store", "http://localhost:9999")
                 }
-                // 保存fonts
-                if (/^chunk\-vendors\.([^\.]*).css$/.test(file)) {
-                    let fonts = content.data.match(/\.\.\/fonts\/([^\)]*\))/g)
-                    if (!$file.exists(local + "/fonts")) $file.mkdir(local + "/fonts")
-                    for (let font of fonts) {
-                        font = font.replace(/\.\.([^\)]*)\)/, "$1")
-                        let contentFont = await $http.download(remote + font)
-                        // 保存文件
-                        $file.write({
-                            data: contentFont.data,
-                            path: `${local}${font}`
-                        })
-                    }
-                }
-                // 保存文件
-                $file.write({
-                    data: $data({ string: content.data }),
-                    path: localPath
-                })
             }
+            // 保存fonts
+            if (/^chunk\-vendors\.([^\.]*).css$/.test(file)) {
+                let fonts = content.data.match(/\.\.\/fonts\/([^\)]*\))/g)
+                if (!$file.exists(local + "/fonts")) $file.mkdir(local + "/fonts")
+                for (let font of fonts) {
+                    font = font.replace(/\.\.([^\)]*)\)/, "$1")
+                    let contentFont = await $http.download(remote + font)
+                    // 保存文件
+                    $file.write({
+                        data: contentFont.data,
+                        path: `${local}${font}`
+                    })
+                }
+            }
+            // 保存文件
+            $file.write({
+                data: $data({ string: content.data }),
+                path: localPath
+            })
         }
     }
 
@@ -63,34 +60,37 @@ class HomeUI {
      */
     async getIndexHtml() {
         let html
-        if (!$file.exists("/assets/dist/index.html")) {
+        if (!$file.exists("/assets/dist/index.html") || !this.isCacheValidity()) {
             let request = await $http.get("https://sub-store.vercel.app")
+            html = request.data
+            // 清除旧文件
+            HomeUI.clearCache()
+            // 获取静态文件
+            await this.getStaticFiles(html)
+            // 更改获取到的html内的链接
+            html = html.replace(/href=\//g, "href=local://assets/dist/")
+            html = html.replace(/src=\//g, "src=local://assets/dist/")
             $file.write({
-                data: $data({ string: request.data }),
+                data: $data({ string: html }),
                 path: "/assets/dist/index.html"
             })
-            html = request.data
         } else {
             html = $file.read("/assets/dist/index.html").string
         }
-        // 获取静态文件
-        await this.getStaticFiles(html)
-        // 更改获取到的html内的链接
-        html = html.replace(/href=\//g, "href=local://assets/dist/")
-        html = html.replace(/src=\//g, "src=local://assets/dist/")
         return html
     }
 
     /**
-     * 检查缓存是否过期
+     * 判断缓存是否有效
      */
-    isClearStatics() {
+    isCacheValidity() {
         if (!$cache.get("updateDate")) {
             $cache.set("updateDate", new Date().getTime())
             return false
         }
-        if (new Date().getTime() - $cache.get("updateDate") > 1000 * 60 * 60 * 60 * this.kernel.setting.get("advanced.cacheLife")) {
-            $cache.set("updateDate", new Date().getTime())
+        const newDate = new Date().getTime()
+        if (newDate - Number($cache.get("updateDate")) < 1000 * 60 * 60 * 60 * this.kernel.setting.get("advanced.cacheLife")) {
+            $cache.set("updateDate", newDate)
             return true
         }
         return false
@@ -122,13 +122,12 @@ class HomeUI {
                         tempNode.innerHTML = template
                         return tempNode.firstChild
                     }
-                    let index = document.querySelector(".v-list--dense").childElementCount
-                    let item = `<div tabindex="${index}" class="v-list-item v-list-item--link theme--dark"><div class="v-list-item__action"><i aria-hidden="true" class="v-icon notranslate material-icons theme--dark">settings</i></div><div class="v-list-item__content"><div class="v-list-item__title">JSBox Setting</div></div></div>`
-                    let node = createNode(item)
+                    const jsboxSettingTemplate = `<div style="position: absolute;right: 15px;top: 20px;font-size:14px;"><span>JSBox 设置</span></div>`
+                    let node = createNode(jsboxSettingTemplate)
                     node.onclick = () => {
                         $notify("jsboxSetting")
                     }
-                    document.querySelector(".v-list--dense").append(node)
+                    document.querySelector(".v-toolbar__content").appendChild(node)
                 }
             },
             events: {
