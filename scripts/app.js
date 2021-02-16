@@ -4,10 +4,10 @@ const MainUI = require("./ui/main")
 class AppKernel extends Kernel {
     constructor() {
         super()
-        this.settingComponent = this._registerComponent("Setting")
+        this.settingComponent = this.registerComponent("Setting")
         this.setting = this.settingComponent.controller
         this.initSettingMethods()
-        this.loading = this._registerComponent("Loading").controller
+        this.loading = this.registerComponent("Loading").controller
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
         if (!$file.exists("drive://SubStore/")) {
