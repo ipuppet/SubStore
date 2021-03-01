@@ -16,9 +16,9 @@ class Factory extends BaseView {
             $ui.pop()
         })
         this.kernel.UIKit.push({
-            view: this.kernel.setting.getView(),
+            views: this.kernel.setting.getView(),
             title: $l10n("JSBOX_SETTING"),
-            hasTopOffset: false
+            topOffset: false
         })
     }
 
