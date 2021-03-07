@@ -1,10 +1,8 @@
 {
     "info": {
         "name": "SubStore",
-        "url": "https://github.com/ipuppet/SubStore",
         "version": "1.1.4",
         "author": "ipuppet",
-        "website": "https://blog.ipuppet.cn",
         "module": false
     },
     "settings": {

@@ -97,7 +97,10 @@
                 "title": "Github",
                 "type": "info",
                 "key": "about.github",
-                "value": "https://github.com/ipuppet/SubStore"
+                "value": [
+                    "ipuppet/SubStore",
+                    "https://github.com/ipuppet/SubStore"
+                ]
             },
             {
                 "icon": [
