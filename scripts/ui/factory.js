@@ -1,13 +1,11 @@
-const BaseView = require("../../../EasyJsBox/src/Foundation/view")
-
-class Factory extends BaseView {
+class Factory {
     constructor(kernel) {
-        super(kernel)
+        this.kernel = kernel
     }
 
     async home() {
         const HomeUI = require("./home")
-        let interfaceUi = new HomeUI(this.kernel, this)
+        const interfaceUi = new HomeUI(this.kernel, this)
         return await interfaceUi.getView()
     }
 
@@ -27,7 +25,7 @@ class Factory extends BaseView {
      */
     async render() {
         this.kernel.loading.start()
-        let homeView = await this.home()
+        const homeView = await this.home()
         $ui.render({
             type: "view",
             props: {

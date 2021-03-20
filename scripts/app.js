@@ -1,5 +1,4 @@
-const { Kernel, VERSION } = require("../EasyJsBox/src/kernel")
-const MainUI = require("./ui/main")
+const { Kernel } = require("../EasyJsBox/src/kernel")
 
 class AppKernel extends Kernel {
     constructor() {
@@ -199,9 +198,8 @@ class AppKernel extends Kernel {
 
 module.exports = {
     run: () => {
-        // 实例化应用核心
-        let kernel = new AppKernel()
-        // 渲染UI
-        new MainUI(kernel).render()
+        const kernel = new AppKernel()
+        const Factory = require("./ui/factory")
+        new Factory(kernel).render()
     }
 }

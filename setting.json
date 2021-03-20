@@ -87,7 +87,10 @@
                 "title": "SUBSTORE",
                 "type": "info",
                 "key": "about.substore",
-                "value": "https://github.com/Peng-YM/Sub-Store"
+                "value": [
+                    "Peng-YM/Sub-Store",
+                    "https://github.com/Peng-YM/Sub-Store"
+                ]
             },
             {
                 "icon": [
