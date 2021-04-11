@@ -41,7 +41,7 @@ class AppKernel extends Kernel {
 
         this.setting.clearCache = animate => {
             animate.actionStart()
-            require("/scripts/ui/main/home").clearCache()
+            require("/scripts/ui/home").clearCache()
             animate.actionDone()
         }
 
@@ -65,7 +65,7 @@ class AppKernel extends Kernel {
                                 $ui.alert($l10n("BACKUP_ERROR"))
                                 animate.actionCancel()
                             } else {
-                                const data = JSON.stringify(resp.data)
+                                const data = typeof resp.data === "string" ? resp.data : JSON.stringify(resp.data)
                                 switch (idx) {
                                     case 0:
                                         $drive.save({
