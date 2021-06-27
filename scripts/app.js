@@ -24,6 +24,14 @@ class AppKernel extends Kernel {
      * 注入设置中的脚本类型方法
      */
     initSettingMethods() {
+        this.setting.tips = animate => {
+            animate.touchHighlight()
+            $ui.alert({
+                title: $l10n("TIPS"),
+                message: `API 被需修改后会清除缓存，若未生效则需要手动清除缓存。`
+            })
+        }
+
         this.setting.readme = animate => {
             animate.touchHighlight()
             const content = $file.read("/README.md").string
@@ -41,16 +49,10 @@ class AppKernel extends Kernel {
 
         this.setting.clearCache = animate => {
             animate.actionStart()
-            require("/scripts/ui/home").clearCache()
+            const HomeUI = require("/scripts/ui/home")
+            const homeUI = new HomeUI()
+            homeUI.clearCache()
             animate.actionDone()
-        }
-
-        this.setting.tips = animate => {
-            animate.touchHighlight()
-            $ui.alert({
-                title: $l10n("TIPS"),
-                message: `运行环境中的QX即Quantumult X\n其他则是指Loon和Surge\n当切换运行环境时，请清除缓存`
-            })
         }
 
         this.setting.backupToICloud = animate => {
@@ -65,7 +67,7 @@ class AppKernel extends Kernel {
                                 $ui.alert($l10n("BACKUP_ERROR"))
                                 animate.actionCancel()
                             } else {
-                                const data = typeof resp.data === "string" ? resp.data : JSON.stringify(resp.data)
+                                const data = JSON.parse(resp.data)
                                 switch (idx) {
                                     case 0:
                                         $drive.save({
