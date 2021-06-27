@@ -10,9 +10,6 @@ class Factory {
     }
 
     setting() {
-        this.kernel.setting.isSecondaryPage(true, () => {
-            $ui.pop()
-        })
         this.kernel.UIKit.push({
             views: this.kernel.setting.getView(),
             title: $l10n("JSBOX_SETTING"),

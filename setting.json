@@ -22,14 +22,10 @@
                     "location.fill",
                     "#FF9900"
                 ],
-                "title": "ENVIRONMENT",
-                "type": "tab",
-                "key": "advanced.environment",
-                "items": [
-                    "QX",
-                    "Other"
-                ],
-                "value": 1
+                "title": "API",
+                "type": "input",
+                "key": "advanced.api",
+                "value": "https://sub.store"
             },
             {
                 "icon": [
