@@ -171,7 +171,7 @@ class AppKernel extends Kernel {
                     if (idx === 0) {
                         $drive.open({
                             handler: data => {
-                                recoverAction(data.string)
+                                recoverAction(data?.string)
                             }
                         })
                     } else if (idx === 1) {
