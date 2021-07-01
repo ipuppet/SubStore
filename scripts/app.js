@@ -5,7 +5,7 @@ class AppKernel extends Kernel {
         super()
         this.settingComponent = this.registerComponent("Setting")
         this.setting = this.settingComponent.controller
-        this.setting.setLargeTitle(false)
+        this.setting.setChildPage(true)
         this.initSettingMethods()
         this.loading = this.registerComponent("Loading").controller
         // 备份路径
