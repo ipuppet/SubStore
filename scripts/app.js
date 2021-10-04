@@ -56,7 +56,7 @@ class AppKernel extends Kernel {
             animate.actionDone()
         }
 
-        this.setting.backupToICloud = animate => {
+        this.setting.export = animate => {
             animate.actionStart()
             $ui.menu({
                 items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("COPY_TO_CLIPBOARD")],
@@ -65,7 +65,7 @@ class AppKernel extends Kernel {
                         url: `${this.host}/api/storage`,
                         handler: (resp) => {
                             if (resp.error) {
-                                $ui.alert($l10n("BACKUP_ERROR"))
+                                $ui.alert($l10n("EXPORT_ERROR"))
                                 animate.actionCancel()
                             } else {
                                 const data = JSON.parse(resp.data)
@@ -105,7 +105,7 @@ class AppKernel extends Kernel {
             })
         }
 
-        this.setting.recoverFromICloud = animate => {
+        this.setting.import = animate => {
             animate.actionStart()
             const recoverAction = data => {
                 try {
@@ -138,7 +138,7 @@ class AppKernel extends Kernel {
                                             if (resp.error) {
                                                 console.log(resp.error)
                                                 $ui.alert({
-                                                    title: $l10n("RECOVER_ERROR"),
+                                                    title: $l10n("IMPORT_ERROR"),
                                                     message: resp.error.localizedDescription
                                                 })
                                                 animate.actionCancel()

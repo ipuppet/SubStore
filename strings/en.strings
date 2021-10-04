@@ -1,0 +1,19 @@
+"SUBSTORE" = "SubStore";
+
+"JSBOX_SETTING" = "JSBox Setting";
+"ENVIRONMENT" = "Evnironment";
+"CLEAR_CACHE" = "Clear Cache";
+"FINISH" = "Done";
+"CACHE_LIFE" = "Cache Life(day)";
+
+"CHOOSE_FILE" = "Choose File";
+"DEFAULT_FILE" = "Default File";
+"MANUAL_INPUT" = "Input";
+"COPY_TO_CLIPBOARD" = "Copy to Clipboard";
+"FILE_NOT_FOUND" = "Fiel Not Found";
+"EXPORT" = "Export";
+"IMPORT" = "Import";
+"EXPORT_ERROR" = "Export Failed";
+"IMPORT_ERROR" = "Import Failed";
+
+"EXIT" = "Exit";

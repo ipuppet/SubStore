@@ -120,7 +120,7 @@ class HomeUI {
                         tempNode.innerHTML = template
                         return tempNode.firstChild
                     }
-                    const jsboxSettingTemplate = `<div style="position: absolute;right: 15px;top: 20px;font-size:14px;"><span>JSBox 设置</span></div>`
+                    const jsboxSettingTemplate = `<div style="position: absolute;right: 15px;top: 20px;font-size:14px;"><span>JSBox</span></div>`
                     let node = createNode(jsboxSettingTemplate)
                     node.onclick = () => {
                         $notify("jsboxSetting")

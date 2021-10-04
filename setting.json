@@ -49,26 +49,38 @@
         ]
     },
     {
-        "title": "BACKUP",
         "items": [
             {
                 "icon": [
                     "icloud.and.arrow.up.fill"
                 ],
-                "title": "BACKUP_ICLOUD",
+                "title": "EXPORT",
                 "type": "script",
                 "key": "backup.backup",
-                "value": "this.controller.backupToICloud"
+                "value": "this.controller.export"
             },
             {
                 "icon": [
                     "arrow.clockwise.icloud.fill",
                     "#FFCC33"
                 ],
-                "title": "RECOVER_ICLOUD",
+                "title": "IMPORT",
                 "type": "script",
                 "key": "backup.recover",
-                "value": "this.controller.recoverFromICloud"
+                "value": "this.controller.import"
+            }
+        ]
+    },
+    {
+        "items": [
+            {
+                "icon": [
+                    "power"
+                ],
+                "title": "EXIT",
+                "type": "script",
+                "key": "exit",
+                "value": "$app.close()"
             }
         ]
     },
