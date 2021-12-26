@@ -236,9 +236,10 @@ module.exports = {
             events: {
                 appeared: () => {
                     const t = setInterval(() => {
-                        $(loadingLabel).text = homeUI.nowDownload
                         if (homeUI.isLoaded) {
                             clearInterval(t)
+                        } else {
+                            $(loadingLabel).text = homeUI.nowDownload
                         }
                     }, 100)
                 }
