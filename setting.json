@@ -10,7 +10,7 @@
                 "title": "TIPS",
                 "type": "script",
                 "key": "tips",
-                "value": "this.controller.tips"
+                "value": "this.method.tips"
             }
         ]
     },
@@ -35,7 +35,7 @@
                 "title": "CLEAR_CACHE",
                 "type": "script",
                 "key": "advanced.clearCache",
-                "value": "this.controller.clearCache"
+                "value": "this.method.clearCache"
             },
             {
                 "icon": [
@@ -57,7 +57,7 @@
                 "title": "EXPORT",
                 "type": "script",
                 "key": "backup.backup",
-                "value": "this.controller.export"
+                "value": "this.method.export"
             },
             {
                 "icon": [
@@ -67,7 +67,7 @@
                 "title": "IMPORT",
                 "type": "script",
                 "key": "backup.recover",
-                "value": "this.controller.import"
+                "value": "this.method.import"
             }
         ]
     },
@@ -134,7 +134,7 @@
                 "title": "README",
                 "type": "script",
                 "key": "about.readme",
-                "value": "this.controller.readme"
+                "value": "this.method.readme"
             }
         ]
     }

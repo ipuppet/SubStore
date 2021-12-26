@@ -1,13 +1,15 @@
-const { Kernel } = require("../EasyJsBox/src/kernel")
+const {
+    UIKit,
+    Kernel,
+    Setting
+} = require("./easy-jsbox")
 
 class AppKernel extends Kernel {
     constructor() {
         super()
-        this.settingComponent = this.registerComponent("Setting")
-        this.setting = this.settingComponent.controller
-        this.setting.setChildPage(true)
+        this.setting = new Setting()
+        this.setting.loadConfig()
         this.initSettingMethods()
-        this.loading = this.registerComponent("Loading").controller
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
         if (!$file.exists("drive://SubStore/")) {
@@ -25,7 +27,7 @@ class AppKernel extends Kernel {
      * 注入设置中的脚本类型方法
      */
     initSettingMethods() {
-        this.setting.tips = animate => {
+        this.setting.method.tips = animate => {
             animate.touchHighlight()
             $ui.alert({
                 title: $l10n("TIPS"),
@@ -33,10 +35,10 @@ class AppKernel extends Kernel {
             })
         }
 
-        this.setting.readme = animate => {
+        this.setting.method.readme = animate => {
             animate.touchHighlight()
             const content = $file.read("/README.md").string
-            this.UIKit.pushPageSheet({
+            UIKit.push({
                 views: [{
                     type: "markdown",
                     props: { content: content },
@@ -48,15 +50,15 @@ class AppKernel extends Kernel {
             })
         }
 
-        this.setting.clearCache = animate => {
+        this.setting.method.clearCache = animate => {
             animate.actionStart()
-            const HomeUI = require("/scripts/ui/home")
+            const HomeUI = require("./ui/home")
             const homeUI = new HomeUI()
             homeUI.clearCache()
             animate.actionDone()
         }
 
-        this.setting.export = animate => {
+        this.setting.method.export = animate => {
             animate.actionStart()
             $ui.menu({
                 items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("COPY_TO_CLIPBOARD")],
@@ -105,7 +107,7 @@ class AppKernel extends Kernel {
             })
         }
 
-        this.setting.import = animate => {
+        this.setting.method.import = animate => {
             animate.actionStart()
             const recoverAction = data => {
                 try {
@@ -200,9 +202,51 @@ class AppKernel extends Kernel {
 }
 
 module.exports = {
-    run: () => {
+    run: async () => {
         const kernel = new AppKernel()
-        const Factory = require("./ui/factory")
-        new Factory(kernel).render()
+        const HomeUI = require("./ui/home")
+        const homeUI = new HomeUI(kernel)
+        const loadingLabel = kernel.uuid()
+        $ui.render({
+            views: [
+                {
+                    type: "spinner",
+                    props: {
+                        loading: true
+                    },
+                    layout: (make, view) => {
+                        make.centerY.equalTo(view.super).offset(-15)
+                        make.width.equalTo(view.super)
+                    }
+                },
+                {
+                    type: "label",
+                    props: {
+                        id: loadingLabel,
+                        align: $align.center,
+                        text: homeUI.nowDownload
+                    },
+                    layout: (make, view) => {
+                        make.top.equalTo(view.prev.bottom).offset(10)
+                        make.left.right.equalTo(view.super)
+                    }
+                }
+            ],
+            layout: $layout.fill,
+            events: {
+                appeared: () => {
+                    const t = setInterval(() => {
+                        $(loadingLabel).text = homeUI.nowDownload
+                        if (homeUI.isLoaded) {
+                            clearInterval(t)
+                        }
+                    }, 100)
+                }
+            }
+        })
+        const homeView = await homeUI.getView()
+        kernel.UIRender({
+            views: [homeView]
+        })
     }
 }

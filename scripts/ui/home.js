@@ -1,8 +1,12 @@
+const { UIKit } = require("../easy-jsbox")
+
 class HomeUI {
     constructor(kernel, factory) {
         this.kernel = kernel
         this.factory = factory
-        this.htmlPath = "/storage/dist"
+        this.htmlPath = "storage/dist"
+        this.nowDownload = ""
+        this.isLoaded = false
     }
 
     /**
@@ -12,10 +16,12 @@ class HomeUI {
     async getStaticFiles(html) {
         const remote = "https://sub-store.vercel.app"
         const list = html.match(/href=\/([^\s>])*[\s|>]/g).concat(html.match(/src=\/([^\s>])*[\s|>]/g))
+        this.staticLength = list.length
         for (let path of list) {
             // 格式化链接
             path = path.replace(/(?:[^=]*)=([^\s>]*)[\s|>]/, "$1")
             if (path === "/favicon.ico") continue
+            this.nowDownload = path.slice(path.indexOf("/", 1) + 1)
             const localPath = this.htmlPath + path
             // 文件夹不存在则创建文件夹
             const dir = localPath.slice(0, localPath.lastIndexOf("/"))
@@ -69,8 +75,8 @@ class HomeUI {
             // 获取静态文件
             await this.getStaticFiles(html)
             // 更改获取到的html内的链接
-            html = html.replace(/href=\//g, `href=local:/${this.htmlPath}/`)
-            html = html.replace(/src=\//g, `src=local:/${this.htmlPath}/`)
+            html = html.replace(/href=\//g, `href=local://${this.htmlPath}/`)
+            html = html.replace(/src=\//g, `src=local://${this.htmlPath}/`)
             $file.write({
                 data: $data({ string: html }),
                 path: `${this.htmlPath}/index.html`
@@ -106,12 +112,14 @@ class HomeUI {
     }
 
     async getView() {
-        let html = await this.getIndexHtml()
+        const html = await this.getIndexHtml()
+        this.isLoaded = true
         return {
             type: "web",
             props: {
                 html: html,
-                opaque: false,
+                showsProgress: false,
+                allowsLinkPreview: true,
                 allowsNavigation: false,
                 script: () => {
                     function createNode(string) {
@@ -130,7 +138,11 @@ class HomeUI {
             },
             events: {
                 jsboxSetting: () => {
-                    this.factory.setting()
+                    UIKit.push({
+                        views: [this.kernel.setting.getListView()],
+                        title: $l10n("JSBOX_SETTING"),
+                        topOffset: false
+                    })
                 }
             },
             layout: $layout.fill
