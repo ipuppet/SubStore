@@ -53,8 +53,7 @@ class AppKernel extends Kernel {
         this.setting.method.clearCache = animate => {
             animate.actionStart()
             const HomeUI = require("./ui/home")
-            const homeUI = new HomeUI()
-            homeUI.clearCache()
+            HomeUI.clearCache()
             animate.actionDone()
         }
 

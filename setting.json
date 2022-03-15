@@ -72,19 +72,6 @@
         ]
     },
     {
-        "items": [
-            {
-                "icon": [
-                    "power"
-                ],
-                "title": "EXIT",
-                "type": "script",
-                "key": "exit",
-                "value": "$app.close()"
-            }
-        ]
-    },
-    {
         "title": "ABOUT",
         "items": [
             {

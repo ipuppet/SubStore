@@ -71,7 +71,7 @@ class HomeUI {
             const request = await $http.get("https://sub-store.vercel.app")
             html = request.data
             // 清除旧文件
-            this.clearCache()
+            HomeUI.clearCache()
             // 获取静态文件
             await this.getStaticFiles(html)
             // 更改获取到的html内的链接
@@ -92,12 +92,8 @@ class HomeUI {
      * 判断缓存是否有效
      */
     isCacheValidity() {
-        const newDate = Date.now()
-        if (!$cache.get("updateDate")) {
-            $cache.set("updateDate", newDate)
-            return false
-        }
-        if ((newDate - Number($cache.get("updateDate"))) < 1000 * 60 * 60 * 60 * this.kernel.setting.get("advanced.cacheLife")) {
+        const cacheLife = 1000 * 60 * 60 * 60 * Number(this.kernel.setting.get("advanced.cacheLife"))
+        if ((Date.now() - Number($cache.get("updateDate") ?? 0)) < cacheLife) {
             return true
         }
         return false
@@ -106,7 +102,7 @@ class HomeUI {
     /**
      * 清除缓存
      */
-    clearCache() {
+    static clearCache() {
         // 删除旧文件
         $file.delete(this.htmlPath)
     }
