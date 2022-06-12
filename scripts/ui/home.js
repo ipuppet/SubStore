@@ -1,4 +1,4 @@
-const { UIKit } = require("../easy-jsbox")
+const { UIKit } = require("../libs/easy-jsbox")
 
 class HomeUI {
     constructor(kernel, factory) {
@@ -71,7 +71,7 @@ class HomeUI {
             const request = await $http.get("https://sub-store.vercel.app")
             html = request.data
             // 清除旧文件
-            HomeUI.clearCache()
+            this.clearCache()
             // 获取静态文件
             await this.getStaticFiles(html)
             // 更改获取到的html内的链接
@@ -102,7 +102,7 @@ class HomeUI {
     /**
      * 清除缓存
      */
-    static clearCache() {
+    clearCache() {
         // 删除旧文件
         $file.delete(this.htmlPath)
     }

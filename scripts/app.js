@@ -1,8 +1,11 @@
 const {
+    View,
     UIKit,
     Kernel,
+    UILoading,
     Setting
-} = require("./easy-jsbox")
+} = require("./libs/easy-jsbox")
+const HomeUI = require("./ui/home")
 
 class AppKernel extends Kernel {
     constructor() {
@@ -15,12 +18,16 @@ class AppKernel extends Kernel {
         if (!$file.exists("drive://SubStore/")) {
             $file.mkdir("drive://SubStore/")
         }
-        // 设置host
-        if (this.setting.get("advanced.environment") === 0) {
-            this.host = "http://localhost:9999"
-        } else {
-            this.host = "https://sub.store"
-        }
+        // 设置 host
+        this.host = this.setting.get("advanced.api", "https://sub.store")
+        this.initComponents()
+    }
+
+    initComponents() {
+        this.loading = new UILoading()
+        this.loading.fullScreen = true
+
+        this.homeUI = new HomeUI(this)
     }
 
     /**
@@ -52,8 +59,7 @@ class AppKernel extends Kernel {
 
         this.setting.method.clearCache = animate => {
             animate.actionStart()
-            const HomeUI = require("./ui/home")
-            HomeUI.clearCache()
+            this.homeUI.clearCache()
             animate.actionDone()
         }
 
@@ -63,13 +69,14 @@ class AppKernel extends Kernel {
                 items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("COPY_TO_CLIPBOARD")],
                 handler: (title, idx) => {
                     $http.get({
-                        url: `${this.host}/api/storage`,
+                        url: `${this.host}/api/artifacts`,
                         handler: (resp) => {
+                            console.log(resp.data)
                             if (resp.error) {
                                 $ui.alert($l10n("EXPORT_ERROR"))
                                 animate.actionCancel()
                             } else {
-                                const data = JSON.parse(resp.data)
+                                const data = typeof resp.data === "string" ? JSON.parse(resp.data) : resp.data
                                 switch (idx) {
                                     case 0:
                                         $drive.save({
@@ -200,53 +207,41 @@ class AppKernel extends Kernel {
     }
 }
 
-module.exports = {
-    run: async () => {
+class AppUI {
+    static renderMainUI() {
         const kernel = new AppKernel()
-        const HomeUI = require("./ui/home")
-        const homeUI = new HomeUI(kernel)
-        const loadingLabel = kernel.uuid()
+        kernel.homeUI.getView().then(data => {
+            kernel.loading.done()
+            kernel.UIRender(View.createByViews([data]))
+        })
+
+        kernel.loading.setLoop(() => {
+            kernel.loading.updateText(kernel.homeUI.nowDownload)
+        })
+        kernel.loading.load()
+    }
+
+    static renderUnsupported() {
+        $intents.finish("不支持在此环境中运行")
         $ui.render({
-            views: [
-                {
-                    type: "spinner",
-                    props: {
-                        loading: true
-                    },
-                    layout: (make, view) => {
-                        make.centerY.equalTo(view.super).offset(-15)
-                        make.width.equalTo(view.super)
-                    }
+            views: [{
+                type: "label",
+                props: {
+                    text: "不支持在此环境中运行",
+                    align: $align.center
                 },
-                {
-                    type: "label",
-                    props: {
-                        id: loadingLabel,
-                        align: $align.center,
-                        text: homeUI.nowDownload
-                    },
-                    layout: (make, view) => {
-                        make.top.equalTo(view.prev.bottom).offset(10)
-                        make.left.right.equalTo(view.super)
-                    }
-                }
-            ],
-            layout: $layout.fill,
-            events: {
-                appeared: () => {
-                    const t = setInterval(() => {
-                        if (homeUI.isLoaded) {
-                            clearInterval(t)
-                        } else {
-                            $(loadingLabel).text = homeUI.nowDownload
-                        }
-                    }, 100)
-                }
-            }
+                layout: $layout.fill
+            }]
         })
-        const homeView = await homeUI.getView()
-        kernel.UIRender({
-            views: [homeView]
-        })
+    }
+}
+
+module.exports = {
+    run: () => {
+        if ($app.env === $env.app || $app.env === $env.action) {
+            AppUI.renderMainUI()
+        } else {
+            AppUI.renderUnsupported()
+        }
     }
 }
