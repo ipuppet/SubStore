@@ -63,49 +63,66 @@ class AppKernel extends Kernel {
             animate.actionDone()
         }
 
+        const check = resp => {
+            if (resp.error) {
+                const url = resp.error.userInfo.NSErrorFailingURLStringKey
+                throw url + "\n" + resp.error.localizedDescription
+            }
+            if (resp.data.status !== "success") {
+                const url = resp.response.url
+                throw url + "\n" + resp.data.message
+            }
+
+            return resp.data.data
+        }
+
         this.setting.method.export = animate => {
             animate.actionStart()
             $ui.menu({
                 items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("COPY_TO_CLIPBOARD")],
-                handler: (title, idx) => {
-                    $http.get({
-                        url: `${this.host}/api/artifacts`,
-                        handler: (resp) => {
-                            console.log(resp.data)
-                            if (resp.error) {
-                                $ui.alert($l10n("EXPORT_ERROR"))
-                                animate.actionCancel()
-                            } else {
-                                const data = typeof resp.data === "string" ? JSON.parse(resp.data) : resp.data
-                                switch (idx) {
-                                    case 0:
-                                        $drive.save({
-                                            data: $data({ string: data }),
-                                            name: this.backupPath.slice(this.backupPath.lastIndexOf("/") + 1),
-                                            handler: success => {
-                                                if (success) {
-                                                    animate.actionDone()
-                                                } else {
-                                                    animate.actionCancel()
-                                                }
-                                            }
-                                        })
-                                        break
-                                    case 1:
-                                        $file.write({
-                                            data: $data({ string: data }),
-                                            path: this.backupPath
-                                        })
+                handler: async (title, idx) => {
+                    let data
+                    try {
+                        data = check(await $http.get({
+                            url: `${this.host}/api/storage`
+                        }))
+                    } catch (error) {
+                        $ui.alert({
+                            title: $l10n("EXPORT_ERROR"),
+                            message: error
+                        })
+                        this.print(error)
+                        animate.actionCancel()
+                        return
+                    }
+
+                    data = JSON.stringify(data)
+                    switch (idx) {
+                        case 0:
+                            $drive.save({
+                                data: $data({ string: data }),
+                                name: this.backupPath.slice(this.backupPath.lastIndexOf("/") + 1),
+                                handler: success => {
+                                    if (success) {
                                         animate.actionDone()
-                                        break
-                                    case 2:
-                                        $clipboard.text = data
-                                        animate.actionDone()
-                                        break
+                                    } else {
+                                        animate.actionCancel()
+                                    }
                                 }
-                            }
-                        }
-                    })
+                            })
+                            break
+                        case 1:
+                            $file.write({
+                                data: $data({ string: data }),
+                                path: this.backupPath
+                            })
+                            animate.actionDone()
+                            break
+                        case 2:
+                            $clipboard.text = data
+                            animate.actionDone()
+                            break
+                    }
                 },
                 finished: (cancelled) => {
                     if (cancelled) animate.actionCancel()
@@ -137,27 +154,27 @@ class AppKernel extends Kernel {
                         actions: [
                             {
                                 title: $l10n("OK"),
-                                handler: () => {
-                                    $http.post({
-                                        url: `${this.host}/api/storage`,
-                                        header: { "Content-Type": "application/json" },
-                                        body: data,
-                                        handler: resp => {
-                                            if (resp.error) {
-                                                console.log(resp.error)
-                                                $ui.alert({
-                                                    title: $l10n("IMPORT_ERROR"),
-                                                    message: resp.error.localizedDescription
-                                                })
-                                                animate.actionCancel()
-                                            } else {
-                                                // 完成动画
-                                                animate.actionDone()
-                                                // 重新启动
-                                                setTimeout(() => { $addin.restart() }, 1000)
-                                            }
-                                        }
-                                    })
+                                handler: async () => {
+                                    try {
+                                        check(await $http.post({
+                                            header: { "Content-Type": "application/json" },
+                                            url: `${this.host}/api/storage`,
+                                            body: data
+                                        }))
+                                    } catch (error) {
+                                        $ui.alert({
+                                            title: $l10n("IMPORT_ERROR"),
+                                            message: error
+                                        })
+                                        this.print(error)
+                                        animate.actionCancel()
+                                        return
+                                    }
+
+                                    // 完成动画
+                                    animate.actionDone()
+                                    // 重新启动
+                                    setTimeout(() => { $addin.restart() }, 1000)
                                 }
                             },
                             {
