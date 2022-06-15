@@ -115,6 +115,7 @@ class HomeUI {
             props: {
                 html: html,
                 showsProgress: false,
+                transparent: true,
                 allowsLinkPreview: true,
                 allowsNavigation: false,
                 script: () => {
