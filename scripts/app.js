@@ -63,19 +63,6 @@ class AppKernel extends Kernel {
             animate.actionDone()
         }
 
-        const check = resp => {
-            if (resp.error) {
-                const url = resp.error.userInfo.NSErrorFailingURLStringKey
-                throw url + "\n" + resp.error.localizedDescription
-            }
-            if (resp.data.status !== "success") {
-                const url = resp.response.url
-                throw url + "\n" + resp.data.message
-            }
-
-            return resp.data.data
-        }
-
         this.setting.method.export = animate => {
             animate.actionStart()
             $ui.menu({
