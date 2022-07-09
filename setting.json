@@ -1,20 +1,5 @@
 [
     {
-        "title": "GENERAL",
-        "items": [
-            {
-                "icon": [
-                    "tag.fill",
-                    "#9B59B6"
-                ],
-                "title": "TIPS",
-                "type": "script",
-                "key": "tips",
-                "value": "this.method.tips"
-            }
-        ]
-    },
-    {
         "title": "ADVANCED",
         "items": [
             {
@@ -26,25 +11,6 @@
                 "type": "input",
                 "key": "advanced.api",
                 "value": "https://sub.store"
-            },
-            {
-                "icon": [
-                    "trash",
-                    "#E74C3C"
-                ],
-                "title": "CLEAR_CACHE",
-                "type": "script",
-                "key": "advanced.clearCache",
-                "value": "this.method.clearCache"
-            },
-            {
-                "icon": [
-                    "arrow.2.circlepath"
-                ],
-                "title": "CACHE_LIFE",
-                "type": "number",
-                "key": "advanced.cacheLife",
-                "value": 7
             }
         ]
     },

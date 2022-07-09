@@ -1,11 +1,5 @@
 "SUBSTORE" = "SubStore";
 
-"JSBOX_SETTING" = "JSBox Setting";
-"ENVIRONMENT" = "Evnironment";
-"CLEAR_CACHE" = "Clear Cache";
-"FINISH" = "Done";
-"CACHE_LIFE" = "Cache Life(day)";
-
 "CHOOSE_FILE" = "Choose File";
 "DEFAULT_FILE" = "Default File";
 "MANUAL_INPUT" = "Input";
@@ -16,4 +10,21 @@
 "EXPORT_ERROR" = "Export Failed";
 "IMPORT_ERROR" = "Import Failed";
 
-"EXIT" = "Exit";
+"SUBSCRIPTION" = "Subscription";
+"COLLECTION" = "Collection";
+"CONTAINS_SUBS" = "Contains Subs";
+"EXPIRE" = "Expire";
+"USAGE" = "Usage";
+
+"SAVE" = "Save";
+"GENERAL" = "General";
+"NAME" = "Name";
+"ICON" = "Icon";
+"SOURCE" = "Source";
+"REMOTE" = "Remote";
+"LOCAL" = "Local";
+"CONTENT" = "Content";
+"UA" = "User-Agent";
+
+"NODE_ACTIONS" = "Node Actions";
+"ADD_ACTION" = "Add Action";

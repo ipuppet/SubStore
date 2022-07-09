@@ -1,12 +1,10 @@
-const {
-    View,
-    UIKit,
-    Kernel,
-    UILoading,
-    Setting
-} = require("./libs/easy-jsbox")
+const { ViewController, Sheet, Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
+const { SubStore } = require("./libs/api")
 const HomeUI = require("./ui/home")
 
+/**
+ * @typedef {AppKernel} AppKernel
+ */
 class AppKernel extends Kernel {
     constructor() {
         super()
@@ -18,15 +16,42 @@ class AppKernel extends Kernel {
         if (!$file.exists("drive://SubStore/")) {
             $file.mkdir("drive://SubStore/")
         }
-        // 设置 host
-        this.host = this.setting.get("advanced.api", "https://sub.store")
         this.initComponents()
     }
 
-    initComponents() {
-        this.loading = new UILoading()
-        this.loading.fullScreen = true
+    get host() {
+        return this.setting.get("advanced.api", "https://sub.store")
+    }
 
+    deleteConfirm(message, conformAction) {
+        $ui.alert({
+            title: message,
+            actions: [
+                {
+                    title: $l10n("DELETE"),
+                    style: $alertActionType.destructive,
+                    handler: () => {
+                        conformAction()
+                    }
+                },
+                { title: $l10n("CANCEL") }
+            ]
+        })
+    }
+
+    bytesToSize(bytes) {
+        if (bytes === 0) return "0 B"
+        const k = 1024,
+            sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+            i = Math.floor(Math.log(bytes) / Math.log(k))
+
+        return (bytes / Math.pow(k, i)).toPrecision(3) + " " + sizes[i]
+    }
+
+    initComponents() {
+        this.api = new SubStore(this.host)
+        this.tabBarController = new TabBarController()
+        this.viewController = new ViewController()
         this.homeUI = new HomeUI(this)
     }
 
@@ -34,33 +59,20 @@ class AppKernel extends Kernel {
      * 注入设置中的脚本类型方法
      */
     initSettingMethods() {
-        this.setting.method.tips = animate => {
-            animate.touchHighlight()
-            $ui.alert({
-                title: $l10n("TIPS"),
-                message: `API 被需修改后会清除缓存，若未生效则需要手动清除缓存。`
-            })
-        }
-
         this.setting.method.readme = animate => {
             animate.touchHighlight()
             const content = $file.read("/README.md").string
-            UIKit.push({
-                views: [{
+            const sheet = new Sheet()
+            sheet
+                .setView({
                     type: "markdown",
                     props: { content: content },
                     layout: (make, view) => {
                         make.size.equalTo(view.super)
                     }
-                }],
-                title: $l10n("README")
-            })
-        }
-
-        this.setting.method.clearCache = animate => {
-            animate.actionStart()
-            this.homeUI.clearCache()
-            animate.actionDone()
+                })
+                .init()
+                .present()
         }
 
         this.setting.method.export = animate => {
@@ -70,7 +82,7 @@ class AppKernel extends Kernel {
                 handler: (title, idx) => {
                     $http.get({
                         url: `${this.host}/api/storage`,
-                        handler: (resp) => {
+                        handler: resp => {
                             if (resp.error) {
                                 $ui.alert($l10n("EXPORT_ERROR"))
                                 animate.actionCancel()
@@ -106,7 +118,7 @@ class AppKernel extends Kernel {
                         }
                     })
                 },
-                finished: (cancelled) => {
+                finished: cancelled => {
                     if (cancelled) animate.actionCancel()
                 }
             })
@@ -117,7 +129,7 @@ class AppKernel extends Kernel {
             const recoverAction = data => {
                 try {
                     let message
-                    if (typeof (data) === "string") {
+                    if (typeof data === "string") {
                         data = JSON.parse(data)
                     }
                     try {
@@ -153,7 +165,9 @@ class AppKernel extends Kernel {
                                                 // 完成动画
                                                 animate.actionDone()
                                                 // 重新启动
-                                                setTimeout(() => { $addin.restart() }, 1000)
+                                                setTimeout(() => {
+                                                    $addin.restart()
+                                                }, 1000)
                                             }
                                         }
                                     })
@@ -198,7 +212,7 @@ class AppKernel extends Kernel {
                         })
                     }
                 },
-                finished: (cancelled) => {
+                finished: cancelled => {
                     if (cancelled) animate.actionCancel()
                 }
             })
@@ -209,28 +223,45 @@ class AppKernel extends Kernel {
 class AppUI {
     static renderMainUI() {
         const kernel = new AppKernel()
-        kernel.homeUI.getView().then(data => {
-            kernel.loading.done()
-            kernel.UIRender(View.createByViews([data]))
-        })
+        const buttons = {
+            home: {
+                icon: "link",
+                title: $l10n("SUBSCRIPTION")
+            },
+            setting: {
+                icon: "gear",
+                title: $l10n("SETTING")
+            }
+        }
 
-        kernel.loading.setLoop(() => {
-            kernel.loading.updateText(kernel.homeUI.nowDownload)
-        })
-        kernel.loading.load()
+        const homePageController = kernel.homeUI.getPageController()
+        kernel.viewController.setRootPageController(homePageController)
+        kernel.tabBarController
+            .setPages({
+                home: homePageController.getPage(),
+                setting: kernel.setting.getPageView()
+            })
+            .setCells({
+                home: buttons.home,
+                setting: buttons.setting
+            })
+
+        kernel.UIRender(kernel.tabBarController.generateView().definition)
     }
 
     static renderUnsupported() {
         $intents.finish("不支持在此环境中运行")
         $ui.render({
-            views: [{
-                type: "label",
-                props: {
-                    text: "不支持在此环境中运行",
-                    align: $align.center
-                },
-                layout: $layout.fill
-            }]
+            views: [
+                {
+                    type: "label",
+                    props: {
+                        text: "不支持在此环境中运行",
+                        align: $align.center
+                    },
+                    layout: $layout.fill
+                }
+            ]
         })
     }
 }
