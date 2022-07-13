@@ -16,6 +16,9 @@
 "EXPIRE" = "Expire";
 "USAGE" = "Usage";
 
+"DELETE" = "Delete";
+"EDIT" = "Edit";
+
 "SAVE" = "Save";
 "GENERAL" = "General";
 "NAME" = "Name";
@@ -32,8 +35,9 @@
 "DEFAULT" = "N";
 "ENABLE" = "T";
 "DISABLE" = "F";
+"USELESS_NODES" = "Useless Nodes";
 "UDP_RELAY" = "UDP Relay";
-"SKIP_TLS_VERIFICATION" = "Skip TLS Verification";
+"SKIP_TLS_VERIFY" = "Skip TLS Verify";
 "TCP_FAST_OPEN" = "TCP Fast Open";
 "VMESS_AEAD" = "Vmess AEAD";
 

@@ -10,10 +10,36 @@
 "EXPORT_ERROR" = "导出失败";
 "IMPORT_ERROR" = "导入失败";
 
-"SUBSCRIPTION" = "Subscription";
-"COLLECTION" = "Collection";
-"CONTAINS_SUBS" = "Contains Subs";
-"EXPIRE" = "Expire";
-"USAGE" = "Usage";
+"SUBSCRIPTION" = "订阅";
+"COLLECTION" = "集合";
+"CONTAINS_SUBS" = "包含订阅";
+"EXPIRE" = "过期日期";
+"USAGE" = "用量";
+
+"DELETE" = "删除";
+"EDIT" = "编辑";
 
 "SAVE" = "保存";
+"GENERAL" = "通用";
+"NAME" = "名称";
+"ICON" = "图标";
+"SOURCE" = "来源";
+"REMOTE" = "远程";
+"LOCAL" = "本地";
+"CONTENT" = "内容";
+"UA" = "User-Agent";
+
+"COMMON_SETTINGS" = "通用设置";
+"RETAIN" = "保留";
+"REMOVE" = "移除";
+"DEFAULT" = "默认";
+"ENABLE" = "开启";
+"DISABLE" = "关闭";
+"USELESS_NODES" = "Useless Nodes";
+"UDP_RELAY" = "UDP Relay";
+"SKIP_TLS_VERIFY" = "Skip TLS Verify";
+"TCP_FAST_OPEN" = "TCP Fast Open";
+"VMESS_AEAD" = "Vmess AEAD";
+
+"NODE_ACTIONS" = "节点操作";
+"ADD_ACTION" = "添加操作";
