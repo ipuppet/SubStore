@@ -69,21 +69,21 @@ class Editor {
                     title: "GENERAL",
                     items: [
                         {
-                            icon: ["location.fill", "#FF9900"],
+                            icon: ["square.and.pencil", "#FF33CC"],
                             title: "NAME",
                             type: "input",
                             key: "name",
                             value: this.editorContent.name
                         },
                         {
-                            icon: ["location.fill", "#FF9900"],
+                            icon: ["photo", "#9966FF"],
                             title: "ICON",
                             type: "input",
                             key: "icon",
                             value: this.editorContent.icon
                         },
                         {
-                            icon: ["location.fill", "#FF9900"],
+                            icon: ["location.fill", "#FFCC33"],
                             title: "SOURCE",
                             type: "tab",
                             key: "source",
@@ -91,16 +91,56 @@ class Editor {
                             value: Editor.SOURCE[this.editorContent.source]
                         },
                         {
-                            icon: ["location.fill", "#FF9900"],
+                            icon: ["link", "#FF99CC"],
                             title: Editor.SOURCE[this.editorContent.source] === 0 ? "URL" : "CONTENT",
                             type: "string",
                             key: "url&content"
                         },
                         {
-                            icon: ["location.fill", "#FF9900"],
+                            icon: ["person.crop.circle", "#000000"],
                             title: "UA",
                             type: "string",
                             key: "ua"
+                        }
+                    ]
+                },
+                {
+                    title: $l10n("COMMON_SETTINGS"),
+                    items: [
+                        {
+                            title: "SOURCE",
+                            type: "tab",
+                            key: "uselessNodes",
+                            items: ["RETAIN", "REMOVE"],
+                            value: 0
+                        },
+                        {
+                            title: "UDP_RELAY",
+                            type: "tab",
+                            key: "udpRelay",
+                            items: ["DEFAULT", "ENABLE", "DISABLE"],
+                            value: 0
+                        },
+                        {
+                            title: "SKIP_TLS_VERIFY",
+                            type: "tab",
+                            key: "skipTLSVerification",
+                            items: ["DEFAULT", "ENABLE", "DISABLE"],
+                            value: 0
+                        },
+                        {
+                            title: "TCP_FAST_OPEN",
+                            type: "tab",
+                            key: "TCPFastOpen",
+                            items: ["DEFAULT", "ENABLE", "DISABLE"],
+                            value: 0
+                        },
+                        {
+                            title: "VMESS_AEAD",
+                            type: "tab",
+                            key: "vmessAEAD",
+                            items: ["DEFAULT", "ENABLE", "DISABLE"],
+                            value: 0
                         }
                     ]
                 }
@@ -128,7 +168,9 @@ class Editor {
                     },
                     events: {
                         // TODO 添加节点操作
-                        tapped: sender => {}
+                        tapped: sender => {
+                            $ui.alert("Not support yet")
+                        }
                     },
                     layout: $layout.fill
                 }

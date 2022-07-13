@@ -26,5 +26,16 @@
 "CONTENT" = "Content";
 "UA" = "User-Agent";
 
+"COMMON_SETTINGS" = "Common Settings";
+"RETAIN" = "Retain";
+"REMOVE" = "Remove";
+"DEFAULT" = "N";
+"ENABLE" = "T";
+"DISABLE" = "F";
+"UDP_RELAY" = "UDP Relay";
+"SKIP_TLS_VERIFICATION" = "Skip TLS Verification";
+"TCP_FAST_OPEN" = "TCP Fast Open";
+"VMESS_AEAD" = "Vmess AEAD";
+
 "NODE_ACTIONS" = "Node Actions";
 "ADD_ACTION" = "Add Action";

@@ -239,7 +239,6 @@ class HomeUI {
 
     getListView() {
         return {
-            // 剪切板列表
             type: "list",
             props: {
                 id: this.listId,
