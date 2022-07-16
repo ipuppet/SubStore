@@ -5,76 +5,50 @@ const { Sheet, Setting } = require("../libs/easy-jsbox")
  */
 
 class Editor {
-    static SOURCE = {
-        remote: 0,
-        local: 1
-    }
     editorContent = {}
     isNew = false
+    static QuickSettingOperatorItems = ["DEFAULT", "ENABLE", "DISABLE"]
+    static QuickSettingOperatorArgs = ["DEFAULT", "ENABLED", "DISABLED"]
 
     /**
+     *
      * @param {AppKernel} kernel
      */
-    constructor(kernel, editorContent = {}, isNew = false) {
+    constructor(kernel) {
         this.kernel = kernel
-        this.isNew = isNew
-        editorContent["url&content"] = editorContent.url ?? editorContent.content
+    }
+
+    init(editorContent = {}) {
+        if (editorContent.process?.length > 0) {
+            for (const iterator of editorContent.process) {
+                if (iterator.type === "Quick Setting Operator") {
+                    Object.assign(editorContent, iterator.args ?? {})
+                    break
+                }
+            }
+        }
+
         this.settingView = new Setting({
-            set: (key, value) => this.#set(key, value),
-            get: (key, _default = null) => this.#get(key, _default),
+            set: (key, value) => this.set(key, value),
+            get: (key, _default = null) => this.get(key, _default),
             structure: this.settingStructure,
             userData: editorContent
         })
         this.settingView.footer = {}
         this.settingView.loadConfig()
+
         this.editorContent = this.settingView.setting
     }
 
-    #set(key, value) {
-        if (key === "source") {
-            if (value === Editor.SOURCE.remote) {
-                $(this.settingView.getId("url&content")).views[0].views[1].text = $l10n("URL")
-            } else {
-                $(this.settingView.getId("url&content")).views[0].views[1].text = $l10n("CONTENT")
-            }
-            // 根据值反推键名
-            const keys = Object.keys(Editor.SOURCE)
-            for (let i = 0; i < keys.length; ++i) {
-                if (Editor.SOURCE[keys[i]] === value) {
-                    this.editorContent["source"] = keys[i]
-                    break
-                }
-            }
-        } else if (key === "url&content") {
-            if (this.settingView.get("source") === Editor.SOURCE.remote) {
-                this.editorContent["url"] = value
-            } else {
-                this.editorContent["content"] = value
-            }
-        } else {
-            this.editorContent[key] = value
-        }
-    }
-
-    #get(key, _default = null) {
-        if (key === "source") {
-            return Editor.SOURCE[this.editorContent[key] ?? 0]
-        }
-        if (key === "url&content") {
-            if (this.settingView.get("source") === Editor.SOURCE.remote) {
-                return this.editorContent["url"]
-            } else {
-                return this.editorContent["content"]
-            }
-        }
-        return this.editorContent[key] ?? _default
-    }
-
-    save() {
-        this.editorContent
-    }
-
     get settingStructure() {
+        const quickSettingOperator = (title, key) => ({
+            title,
+            key,
+            type: "tab",
+            items: Editor.QuickSettingOperatorItems,
+            values: Editor.QuickSettingOperatorArgs,
+            value: Editor.QuickSettingOperatorArgs[0]
+        })
         return [
             {
                 title: "GENERAL",
@@ -94,20 +68,6 @@ class Editor {
                         value: this.editorContent.icon
                     },
                     {
-                        icon: ["location.fill", "#FFCC33"],
-                        title: "SOURCE",
-                        type: "tab",
-                        key: "source",
-                        items: ["REMOTE", "LOCAL"],
-                        value: Editor.SOURCE[this.editorContent.source]
-                    },
-                    {
-                        icon: ["link", "#FF99CC"],
-                        title: Editor.SOURCE[this.editorContent.source] === 0 ? "URL" : "CONTENT",
-                        type: "string",
-                        key: "url&content"
-                    },
-                    {
                         icon: ["person.crop.circle", "#000000"],
                         title: "UA",
                         type: "string",
@@ -121,41 +81,39 @@ class Editor {
                     {
                         title: "USELESS_NODES",
                         type: "tab",
-                        key: "uselessNodes",
+                        key: "useless",
                         items: ["RETAIN", "REMOVE"],
-                        value: 0
+                        values: ["DISABLED", "ENABLED"],
+                        value: "DISABLED"
                     },
-                    {
-                        title: "UDP_RELAY",
-                        type: "tab",
-                        key: "udpRelay",
-                        items: ["DEFAULT", "ENABLE", "DISABLE"],
-                        value: 0
-                    },
-                    {
-                        title: "SKIP_TLS_VERIFY",
-                        type: "tab",
-                        key: "skipTLSVerify",
-                        items: ["DEFAULT", "ENABLE", "DISABLE"],
-                        value: 0
-                    },
-                    {
-                        title: "TCP_FAST_OPEN",
-                        type: "tab",
-                        key: "TCPFastOpen",
-                        items: ["DEFAULT", "ENABLE", "DISABLE"],
-                        value: 0
-                    },
-                    {
-                        title: "VMESS_AEAD",
-                        type: "tab",
-                        key: "vmessAEAD",
-                        items: ["DEFAULT", "ENABLE", "DISABLE"],
-                        value: 0
-                    }
+                    quickSettingOperator("UDP_RELAY", "udp"),
+                    quickSettingOperator("SKIP_TLS_VERIFY", "scert"),
+                    quickSettingOperator("TCP_FAST_OPEN", "tfo"),
+                    quickSettingOperator("VMESS_AEAD", "vmess aead")
                 ]
             }
         ]
+    }
+
+    get quickSettingOperator() {
+        return {
+            type: "Quick Setting Operator",
+            args: {
+                scert: this.get("scert"),
+                tfo: this.get("tfo"),
+                udp: this.get("udp"),
+                useless: this.get("useless"),
+                "vmess aead": this.get("vmess aead")
+            }
+        }
+    }
+
+    set(key, value) {
+        this.editorContent[key] = value
+    }
+
+    get(key, _default = null) {
+        return this.editorContent[key] ?? _default
     }
 
     getListView() {
@@ -196,4 +154,150 @@ class Editor {
     }
 }
 
-module.exports = Editor
+class SubscriptionEditor extends Editor {
+    static Source = {
+        remote: 0,
+        local: 1
+    }
+    static SourceValue(source) {
+        const keys = Object.keys(SubscriptionEditor.Source)
+        for (let i = 0; i < keys.length; ++i) {
+            if (SubscriptionEditor.Source[keys[i]] === source) {
+                return keys[i]
+            }
+        }
+    }
+
+    editorContent = {
+        name: "",
+        icon: "",
+        ua: "",
+        source: "remote",
+        url: "",
+        content: "",
+        process: []
+    }
+
+    /**
+     *
+     * @param {AppKernel} kernel
+     * @param {{name: string, icon: string, ua: string, source: string, url: string, content: string}} editorContent
+     */
+    constructor(kernel, editorContent) {
+        super(kernel)
+        if (!editorContent) {
+            editorContent = this.editorContent
+            this.isNew = true
+        }
+        editorContent["url&content"] = editorContent.url ?? editorContent.content
+        this.initSource = SubscriptionEditor.Source[editorContent.source]
+        this.init(editorContent)
+    }
+
+    set(key, value) {
+        if (key === "source") {
+            if (value === SubscriptionEditor.Source.remote) {
+                $(this.settingView.getId("url&content")).views[0].views[1].text = $l10n("URL")
+            } else {
+                $(this.settingView.getId("url&content")).views[0].views[1].text = $l10n("CONTENT")
+            }
+            this.editorContent["source"] = SubscriptionEditor.SourceValue(value)
+        } else if (key === "url&content") {
+            if (this.settingView.get("source") === SubscriptionEditor.Source.remote) {
+                this.editorContent["url"] = value
+            } else {
+                this.editorContent["content"] = value
+            }
+        } else {
+            this.editorContent[key] = value
+        }
+    }
+
+    get(key, _default = null) {
+        if (key === "source") {
+            return SubscriptionEditor.Source[this.editorContent[key] ?? 0]
+        }
+        if (key === "url&content") {
+            if (this.settingView.get("source") === SubscriptionEditor.Source.remote) {
+                return this.editorContent["url"]
+            } else {
+                return this.editorContent["content"]
+            }
+        }
+        return this.editorContent[key] ?? _default
+    }
+
+    get settingStructure() {
+        const settingStructure = super.settingStructure
+        settingStructure[0].items = settingStructure[0].items.concat([
+            {
+                icon: ["location.fill", "#FFCC33"],
+                title: "SOURCE",
+                type: "tab",
+                key: "source",
+                items: ["REMOTE", "LOCAL"],
+                value: this.initSource
+            },
+            {
+                icon: ["link", "#FF99CC"],
+                title: this.initSource === SubscriptionEditor.Source.remote ? "URL" : "CONTENT",
+                type: "string",
+                key: "url&content"
+            }
+        ])
+        return settingStructure
+    }
+
+    save() {
+        delete this.editorContent["url&content"]
+        if (!Array.isArray(this.editorContent.process)) {
+            this.editorContent.process = []
+        }
+        this.editorContent.process.unshift(this.quickSettingOperator)
+        if (this.isNew) {
+            //this.kernel.api.addSubscription(this.editorContent)
+        }
+        console.log(this.editorContent)
+    }
+}
+
+class CollectionEditor extends Editor {
+    editorContent = {
+        name: "",
+        icon: "",
+        ua: "",
+        subscriptions: [],
+        process: []
+    }
+
+    /**
+     *
+     * @param {AppKernel} kernel
+     * @param {{name: string, icon: string, ua: string, subscriptions: Array}} editorContent
+     */
+    constructor(kernel, editorContent) {
+        super(kernel)
+        if (!editorContent) {
+            editorContent = this.editorContent
+            this.isNew = true
+        }
+        this.init(editorContent)
+    }
+
+    get settingStructure() {
+        const settingStructure = super.settingStructure
+        settingStructure[0].items.push({
+            icon: ["link", "#FF99CC"],
+            title: "subscriptions",
+            type: "string",
+            key: "subscriptions"
+        })
+        return settingStructure
+    }
+
+    save() {
+        console.log(this.editorContent)
+    }
+}
+
+module.exports = { SubscriptionEditor, CollectionEditor }

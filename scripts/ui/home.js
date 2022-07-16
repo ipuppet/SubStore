@@ -1,11 +1,15 @@
 const { UIKit, PageController } = require("../libs/easy-jsbox")
-const Editor = require("./editor")
+const { SubscriptionEditor, CollectionEditor } = require("./editor")
 
 /**
  * @typedef {import("../app").AppKernel} AppKernel
  */
 
 class HomeUI {
+    static EditorType = {
+        Subscription: 0,
+        Collection: 1
+    }
     subscriptions = []
     collections = []
 
@@ -91,11 +95,17 @@ class HomeUI {
         }
     }
 
-    newEditor(editorContent) {
-        return new Editor(this.kernel, editorContent)
+    newEditor(type, data = undefined) {
+        if (type === HomeUI.EditorType.Subscription) {
+            // SubscriptionEditor
+            const editor = new SubscriptionEditor(this.kernel, data)
+            editor.present()
+        } else {
+            // CollectionEditor
+            const editor = new CollectionEditor(this.kernel, data)
+            editor.present()
+        }
     }
-
-    addSubscription() {}
 
     deleteSubscription(name, isSubs) {
         this.kernel.deleteConfirm(`Are you sure you want to delete ${name}?`, async () => {
@@ -230,8 +240,7 @@ class HomeUI {
                 color: $color("green"),
                 handler: (sender, indexPath) => {
                     const info = sender.object(indexPath).info.info
-                    const editor = this.newEditor(info)
-                    editor.present()
+                    this.newEditor(indexPath.section, info)
                 }
             }
         ]
@@ -253,8 +262,7 @@ class HomeUI {
                 didSelect: (sender, indexPath, data) => {
                     // TODO 差异预览
                     const info = data.info.info
-                    const editor = this.newEditor(info)
-                    editor.present()
+                    this.newEditor(indexPath.section, info)
                 }
             }
         }
@@ -265,11 +273,28 @@ class HomeUI {
         pageController.navigationItem.setTitle($l10n("SUBSCRIPTION")).setRightButtons([
             {
                 symbol: "plus.circle",
-                tapped: () => this.addSubscription()
+                menu: {
+                    pullDown: true,
+                    asPrimary: true,
+                    items: [
+                        {
+                            title: $l10n("SUBSCRIPTION"),
+                            handler: () => {
+                                this.newEditor(HomeUI.EditorType.Subscription)
+                            }
+                        },
+                        {
+                            title: $l10n("COLLECTION"),
+                            handler: () => {
+                                this.newEditor(HomeUI.EditorType.Collection)
+                            }
+                        }
+                    ]
+                }
             },
             {
                 symbol: "arrow.clockwise",
-                tapped: () => this.init()
+                tapped: () => this.init(true)
             }
         ])
         pageController.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)

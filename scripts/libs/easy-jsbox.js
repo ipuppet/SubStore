@@ -2515,7 +2515,8 @@ class Setting extends Controller {
     method = {}
     // style
     rowHeight = 50
-    rightOffset = 15
+    edgeOffset = 10
+    iconSize = 30
     // withTouchEvents 延时自动关闭高亮，防止 touchesMoved 事件未正常调用
     #withTouchEventsT = {}
     // read only
@@ -2875,8 +2876,8 @@ class Setting extends Controller {
                     ],
                     layout: (make, view) => {
                         make.centerY.equalTo(view.super)
-                        make.size.equalTo(30)
-                        make.left.inset(10)
+                        make.size.equalTo(this.iconSize)
+                        make.left.inset(this.edgeOffset)
                     }
                 },
                 {
@@ -2884,19 +2885,19 @@ class Setting extends Controller {
                     type: "label",
                     props: {
                         text: title,
+                        lines: 1,
                         textColor: this.textColor,
                         align: $align.left
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.super)
                         make.height.equalTo(view.super)
-                        make.left.equalTo(view.prev.right).offset(10)
+                        make.left.equalTo(view.prev.right).offset(this.edgeOffset)
                     }
                 }
             ],
             layout: (make, view) => {
-                make.centerY.equalTo(view.super)
-                make.height.equalTo(view.super)
+                make.height.centerY.equalTo(view.super)
                 make.left.inset(0)
             }
         }
@@ -2922,7 +2923,7 @@ class Setting extends Controller {
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.prev)
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                         make.width.equalTo(180)
                     }
                 },
@@ -2987,7 +2988,7 @@ class Setting extends Controller {
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.prev)
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                     }
                 }
             ],
@@ -3104,7 +3105,7 @@ class Setting extends Controller {
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.prev)
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                         make.height.equalTo(this.rowHeight)
                         make.width.equalTo(100)
                     }
@@ -3156,7 +3157,7 @@ class Setting extends Controller {
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.prev)
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                     }
                 }
             ],
@@ -3287,7 +3288,7 @@ class Setting extends Controller {
                         }
                     ],
                     layout: (make, view) => {
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                         make.height.equalTo(this.rowHeight)
                         make.width.equalTo(view.super)
                     }
@@ -3297,8 +3298,9 @@ class Setting extends Controller {
         }
     }
 
-    createTab(key, icon, title, items, withTitle) {
+    createTab(key, icon, title, items = [], values = []) {
         const id = this.getId(key)
+        const isCustomizeValues = items.length > 0 && values.length === items.length
         return {
             type: "view",
             props: { id },
@@ -3308,21 +3310,79 @@ class Setting extends Controller {
                     type: "tab",
                     props: {
                         items: items,
-                        index: this.get(key),
+                        index: isCustomizeValues ? values.indexOf(this.get(key)) : this.get(key),
                         dynamicWidth: true
                     },
                     layout: (make, view) => {
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                         make.centerY.equalTo(view.prev)
                     },
                     events: {
                         changed: sender => {
-                            const value = withTitle ? [sender.index, title] : sender.index
-                            this.set(key, value)
+                            if (isCustomizeValues) {
+                                this.set(key, values[sender.index])
+                            } else {
+                                this.set(key, sender.index)
+                            }
                         }
                     }
                 }
             ],
+            layout: $layout.fill
+        }
+    }
+
+    createMenu(key, icon, title, items = [], values = []) {
+        const id = this.getId(key)
+        const labelId = `${id}-label`
+        const isCustomizeValues = items.length > 0 && values.length === items.length
+        return {
+            type: "view",
+            props: { id: id },
+            views: [
+                this.createLineLabel(title, icon),
+                {
+                    type: "view",
+                    views: [
+                        {
+                            type: "label",
+                            props: {
+                                text: isCustomizeValues ? items[values.indexOf(this.get(key))] : items[this.get(key)],
+                                color: $color("secondaryText"),
+                                id: labelId
+                            },
+                            layout: (make, view) => {
+                                make.right.inset(0)
+                                make.height.equalTo(view.super)
+                            }
+                        }
+                    ],
+                    layout: (make, view) => {
+                        make.right.inset(this.edgeOffset)
+                        make.height.equalTo(this.rowHeight)
+                        make.width.equalTo(view.super)
+                    }
+                }
+            ],
+            events: this.#withTouchEvents(id, {
+                tapped: () => {
+                    this.#touchHighlightStart(id)
+                    $ui.menu({
+                        items: items,
+                        handler: (title, idx) => {
+                            if (isCustomizeValues) {
+                                this.set(key, values[idx])
+                            } else {
+                                this.set(key, idx)
+                            }
+                            $(labelId).text = $l10n(title)
+                        },
+                        finished: () => {
+                            this.#touchHighlightEnd(id, 0.2)
+                        }
+                    })
+                }
+            }),
             layout: $layout.fill
         }
     }
@@ -3350,7 +3410,7 @@ class Setting extends Controller {
                             },
                             layout: (make, view) => {
                                 make.centerY.equalTo(view.super)
-                                make.right.inset(this.rightOffset)
+                                make.right.inset(this.edgeOffset)
                                 make.size.equalTo(20)
                             }
                         },
@@ -3376,65 +3436,6 @@ class Setting extends Controller {
                     }
                 }
             ],
-            layout: $layout.fill
-        }
-    }
-
-    createMenu(key, icon, title, items, withTitle) {
-        const id = this.getId(key)
-        const labelId = `${id}-label`
-        return {
-            type: "view",
-            props: { id: id },
-            views: [
-                this.createLineLabel(title, icon),
-                {
-                    type: "view",
-                    views: [
-                        {
-                            type: "label",
-                            props: {
-                                text: withTitle
-                                    ? items[
-                                          (() => {
-                                              const value = this.get(key)
-                                              if (typeof value === "object") return value[0]
-                                              else return value
-                                          })()
-                                      ]
-                                    : items[this.get(key)],
-                                color: $color("secondaryText"),
-                                id: labelId
-                            },
-                            layout: (make, view) => {
-                                make.right.inset(0)
-                                make.height.equalTo(view.super)
-                            }
-                        }
-                    ],
-                    layout: (make, view) => {
-                        make.right.inset(this.rightOffset)
-                        make.height.equalTo(this.rowHeight)
-                        make.width.equalTo(view.super)
-                    }
-                }
-            ],
-            events: this.#withTouchEvents(id, {
-                tapped: () => {
-                    this.#touchHighlightStart(id)
-                    $ui.menu({
-                        items: items,
-                        handler: (title, idx) => {
-                            const value = withTitle ? [idx, title] : idx
-                            this.set(key, value)
-                            $(labelId).text = $l10n(title)
-                        },
-                        finished: () => {
-                            this.#touchHighlightEnd(id, 0.2)
-                        }
-                    })
-                }
-            }),
             layout: $layout.fill
         }
     }
@@ -3492,7 +3493,7 @@ class Setting extends Controller {
                         }
                     },
                     layout: (make, view) => {
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                         make.height.equalTo(this.rowHeight)
                         make.width.equalTo(view.super)
                     }
@@ -3513,38 +3514,40 @@ class Setting extends Controller {
                     type: "view",
                     views: [
                         {
-                            type: "label",
+                            type: "input",
                             props: {
-                                id: `${id}-label`,
-                                color: $color("secondaryText"),
+                                align: $align.right,
+                                bgcolor: $color("clear"),
+                                textColor: $color("secondaryText"),
                                 text: this.get(key)
                             },
-                            layout: (make, view) => {
+                            layout: function (make, view) {
                                 make.right.inset(0)
-                                make.height.equalTo(view.super)
+                                make.size.equalTo(view.super)
+                            },
+                            events: {
+                                didBeginEditing: () => {
+                                    // 防止键盘遮挡
+                                    if (!$app.autoKeyboardEnabled) {
+                                        $app.autoKeyboardEnabled = true
+                                    }
+                                },
+                                returned: sender => {
+                                    // 结束编辑，由 didEndEditing 进行保存
+                                    sender.blur()
+                                },
+                                didEndEditing: sender => {
+                                    this.set(key, sender.text)
+                                    sender.blur()
+                                }
                             }
                         }
                     ],
-                    events: {
-                        tapped: () => {
-                            $input.text({
-                                text: this.get(key),
-                                placeholder: title,
-                                handler: text => {
-                                    if (text === "") {
-                                        $ui.toast($l10n("INVALID_VALUE"))
-                                        return
-                                    }
-                                    this.set(key, text)
-                                    $(`${id}-label`).text = text
-                                }
-                            })
-                        }
-                    },
                     layout: (make, view) => {
-                        make.right.inset(this.rightOffset)
-                        make.height.equalTo(this.rowHeight)
-                        make.width.equalTo(view.super)
+                        // 与标题间距 this.edgeOffset
+                        make.left.equalTo(view.prev.get("label").right).offset(this.edgeOffset)
+                        make.right.inset(this.edgeOffset)
+                        make.height.equalTo(view.super)
                     }
                 }
             ],
@@ -3580,7 +3583,7 @@ class Setting extends Controller {
                                 smoothCorners: true
                             },
                             layout: (make, view) => {
-                                make.right.inset(this.rightOffset)
+                                make.right.inset(this.edgeOffset)
                                 make.centerY.equalTo(view.super)
                                 make.size.equalTo($size(30, 30))
                             }
@@ -3656,7 +3659,7 @@ class Setting extends Controller {
                     },
                     layout: (make, view) => {
                         make.centerY.equalTo(view.super)
-                        make.right.inset(this.rightOffset)
+                        make.right.inset(this.edgeOffset)
                         make.size.equalTo(15)
                     }
                 }
@@ -3715,7 +3718,7 @@ class Setting extends Controller {
                                 image: this.getImage(key, true) ?? $image("questionmark.square.dashed")
                             },
                             layout: (make, view) => {
-                                make.right.inset(this.rightOffset)
+                                make.right.inset(this.edgeOffset)
                                 make.centerY.equalTo(view.super)
                                 make.size.equalTo($size(30, 30))
                             }
@@ -3807,16 +3810,25 @@ class Setting extends Controller {
                         row = this.createScript(item.key, item.icon, item.title, value)
                         break
                     case "tab":
-                        row = this.createTab(item.key, item.icon, item.title, item.items, item.withTitle)
-                        break
-                    case "color":
-                        row = this.createColor(item.key, item.icon, item.title)
+                        if (typeof item.items === "string") {
+                            item.items = eval(`(()=>{return ${item.items}()})()`)
+                        }
+                        if (typeof item.values === "string") {
+                            item.values = eval(`(()=>{return ${item.values}()})()`)
+                        }
+                        row = this.createTab(item.key, item.icon, item.title, item.items, item.values)
                         break
                     case "menu":
                         if (typeof item.items === "string") {
                             item.items = eval(`(()=>{return ${item.items}()})()`)
                         }
-                        row = this.createMenu(item.key, item.icon, item.title, item.items, item.withTitle)
+                        if (typeof item.values === "string") {
+                            item.values = eval(`(()=>{return ${item.values}()})()`)
+                        }
+                        row = this.createMenu(item.key, item.icon, item.title, item.items, item.values)
+                        break
+                    case "color":
+                        row = this.createColor(item.key, item.icon, item.title)
                         break
                     case "date":
                         row = this.createDate(item.key, item.icon, item.title, item.mode)
@@ -3851,7 +3863,7 @@ class Setting extends Controller {
             type: "list",
             props: {
                 style: 2,
-                separatorInset: $insets(0, 50, 0, 10), // 分割线边距
+                separatorInset: $insets(0, this.iconSize + this.edgeOffset * 2, 0, this.edgeOffset), // 分割线边距
                 rowHeight: this.rowHeight,
                 bgcolor: UIKit.scrollViewBackgroundColor,
                 footer: footer,
