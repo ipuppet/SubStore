@@ -5,10 +5,8 @@ const { Sheet, Setting } = require("../libs/easy-jsbox")
  */
 
 class Editor {
-    editorContent = {}
     isNew = false
-    static QuickSettingOperatorItems = ["DEFAULT", "ENABLE", "DISABLE"]
-    static QuickSettingOperatorArgs = ["DEFAULT", "ENABLED", "DISABLED"]
+    editorContent = {}
 
     /**
      *
@@ -28,27 +26,59 @@ class Editor {
             }
         }
 
-        this.settingView = new Setting({
+        this.setting = new Setting({
             set: (key, value) => this.set(key, value),
             get: (key, _default = null) => this.get(key, _default),
             structure: this.settingStructure,
             userData: editorContent
         })
-        this.settingView.footer = {}
-        this.settingView.loadConfig()
+        this.setting.footer = {}
+        this.setting.loadConfig()
 
-        this.editorContent = this.settingView.setting
+        this.editorContent = this.setting.setting
     }
 
-    get settingStructure() {
-        const quickSettingOperator = (title, key) => ({
+    get singleKV() {
+        return {
+            comment: "init process",
+            key: "process",
+            value: []
+        }
+    }
+
+    get quickSettingStructure() {
+        const Items = ["DEFAULT", "ENABLE", "DISABLE"]
+        const Args = ["DEFAULT", "ENABLED", "DISABLED"]
+
+        const quickSetting = (title, key) => ({
             title,
             key,
             type: "tab",
-            items: Editor.QuickSettingOperatorItems,
-            values: Editor.QuickSettingOperatorArgs,
-            value: Editor.QuickSettingOperatorArgs[0]
+            items: Items,
+            values: Args,
+            value: Args[0]
         })
+
+        return {
+            title: $l10n("COMMON_SETTINGS"),
+            items: [
+                {
+                    title: "USELESS_NODES",
+                    type: "tab",
+                    key: "useless",
+                    items: ["RETAIN", "REMOVE"],
+                    values: ["DISABLED", "ENABLED"],
+                    value: "DISABLED"
+                },
+                quickSetting("UDP_RELAY", "udp"),
+                quickSetting("SKIP_TLS_VERIFY", "scert"),
+                quickSetting("TCP_FAST_OPEN", "tfo"),
+                quickSetting("VMESS_AEAD", "vmess aead")
+            ]
+        }
+    }
+
+    get settingStructure() {
         return [
             {
                 title: "GENERAL",
@@ -73,41 +103,17 @@ class Editor {
                         type: "string",
                         key: "ua"
                     }
-                ]
-            },
-            {
-                title: $l10n("COMMON_SETTINGS"),
-                items: [
-                    {
-                        title: "USELESS_NODES",
-                        type: "tab",
-                        key: "useless",
-                        items: ["RETAIN", "REMOVE"],
-                        values: ["DISABLED", "ENABLED"],
-                        value: "DISABLED"
-                    },
-                    quickSettingOperator("UDP_RELAY", "udp"),
-                    quickSettingOperator("SKIP_TLS_VERIFY", "scert"),
-                    quickSettingOperator("TCP_FAST_OPEN", "tfo"),
-                    quickSettingOperator("VMESS_AEAD", "vmess aead")
-                ]
+                ].concat(this.singleKV)
             }
+            //this.quickSettingStructure
         ]
     }
 
-    get quickSettingOperator() {
-        return {
-            type: "Quick Setting Operator",
-            args: {
-                scert: this.get("scert"),
-                tfo: this.get("tfo"),
-                udp: this.get("udp"),
-                useless: this.get("useless"),
-                "vmess aead": this.get("vmess aead")
-            }
-        }
-    }
-
+    /**
+     *
+     * @param {string} key
+     * @param {any} value
+     */
     set(key, value) {
         this.editorContent[key] = value
     }
@@ -117,22 +123,60 @@ class Editor {
     }
 
     getListView() {
-        const listView = this.settingView.getListView()
+        const listView = this.setting.getListView()
 
         listView.props.data.push({
             title: $l10n("NODE_ACTIONS"),
             rows: [
                 {
-                    type: "button",
+                    type: "view",
                     props: {
-                        title: $l10n("ADD_ACTION")
-                    },
-                    events: {
-                        // TODO 添加节点操作
-                        tapped: sender => {
-                            $ui.alert("Not support yet")
+                        id: "sadf",
+                        info: {
+                            rowHeight: 50
                         }
                     },
+                    views: [
+                        {
+                            type: "button",
+                            props: {
+                                title: $l10n("ADD_ACTION")
+                            },
+                            events: {
+                                // TODO 添加节点操作
+                                tapped: sender => {
+                                    return
+                                    const Action = require("./node_actions/QuickSettingStructure")
+                                    const action = new Action({})
+
+                                    const length = $(this.setting.name)?.data[1]?.rows?.length ?? 0
+                                    $(this.setting.name).insert({
+                                        indexPath: $indexPath(1, length),
+                                        value: action.getView()
+                                    })
+
+                                    return
+                                    $ui.menu({
+                                        items: ["QuickSettingOperator"],
+                                        handler: (title, idx) => {
+                                            const Action = require("./node_actions/QuickSettingStructure")
+                                            const action = new Action({})
+
+                                            //console.log($(this.setting.name).data)
+
+                                            const data = $(this.setting.name).data
+                                            data[1].rows.push(action.getView())
+
+                                            $(this.setting.name).data = data
+                                        }
+                                    })
+                                }
+                            },
+                            layout: (make, view) => {
+                                make.size.equalTo(view.super)
+                            }
+                        }
+                    ],
                     layout: $layout.fill
                 }
             ]
@@ -181,7 +225,7 @@ class SubscriptionEditor extends Editor {
     /**
      *
      * @param {AppKernel} kernel
-     * @param {{name: string, icon: string, ua: string, source: string, url: string, content: string}} editorContent
+     * @param {{name: string, icon: string, ua: string, source: string, url: string, content: string}|undefined} editorContent
      */
     constructor(kernel, editorContent) {
         super(kernel)
@@ -197,19 +241,19 @@ class SubscriptionEditor extends Editor {
     set(key, value) {
         if (key === "source") {
             if (value === SubscriptionEditor.Source.remote) {
-                $(this.settingView.getId("url&content")).views[0].views[1].text = $l10n("URL")
+                $(this.setting.getId("url&content")).views[0].views[1].text = $l10n("URL")
             } else {
-                $(this.settingView.getId("url&content")).views[0].views[1].text = $l10n("CONTENT")
+                $(this.setting.getId("url&content")).views[0].views[1].text = $l10n("CONTENT")
             }
             this.editorContent["source"] = SubscriptionEditor.SourceValue(value)
         } else if (key === "url&content") {
-            if (this.settingView.get("source") === SubscriptionEditor.Source.remote) {
+            if (this.setting.get("source") === SubscriptionEditor.Source.remote) {
                 this.editorContent["url"] = value
             } else {
                 this.editorContent["content"] = value
             }
         } else {
-            this.editorContent[key] = value
+            super.set(key, value)
         }
     }
 
@@ -218,13 +262,13 @@ class SubscriptionEditor extends Editor {
             return SubscriptionEditor.Source[this.editorContent[key] ?? 0]
         }
         if (key === "url&content") {
-            if (this.settingView.get("source") === SubscriptionEditor.Source.remote) {
+            if (this.setting.get("source") === SubscriptionEditor.Source.remote) {
                 return this.editorContent["url"]
             } else {
                 return this.editorContent["content"]
             }
         }
-        return this.editorContent[key] ?? _default
+        return super.get(key, _default)
     }
 
     get settingStructure() {
@@ -250,10 +294,8 @@ class SubscriptionEditor extends Editor {
 
     save() {
         delete this.editorContent["url&content"]
-        if (!Array.isArray(this.editorContent.process)) {
-            this.editorContent.process = []
-        }
-        this.editorContent.process.unshift(this.quickSettingOperator)
+
+        //this.editorContent.process.unshift(this.quickSettingOperator)
         if (this.isNew) {
             //this.kernel.api.addSubscription(this.editorContent)
         }
@@ -273,7 +315,7 @@ class CollectionEditor extends Editor {
     /**
      *
      * @param {AppKernel} kernel
-     * @param {{name: string, icon: string, ua: string, subscriptions: Array}} editorContent
+     * @param {{name: string, icon: string, ua: string, subscriptions: Array}|undefined} editorContent
      */
     constructor(kernel, editorContent) {
         super(kernel)
