@@ -24,6 +24,8 @@ class Editor {
         }
     }
 
+    processSection = 2
+
     /**
      *
      * @param {AppKernel} kernel
@@ -175,7 +177,7 @@ class Editor {
         const setting = $(this.setting.name)
 
         let cellIndex = 0
-        let cellView = setting.cell($indexPath(2, cellIndex))
+        let cellView = setting.cell($indexPath(this.processSection, cellIndex))
 
         while (cellView) {
             let cell = {}
@@ -189,7 +191,7 @@ class Editor {
             }
             process.push(cell.info)
             // 下一个 cellView
-            cellView = setting.cell($indexPath(2, ++cellIndex))
+            cellView = setting.cell($indexPath(this.processSection, ++cellIndex))
         }
 
         return process
@@ -211,7 +213,24 @@ class Editor {
 
     getListView() {
         const listView = this.setting.getListView()
-        listView.props.template = this.settingTemplate
+        Object.assign(listView.props, {
+            template: this.settingTemplate,
+            reorder: true,
+            crossSections: false,
+            actions: [
+                {
+                    title: "delete"
+                }
+            ]
+        })
+        Object.assign(listView.events, {
+            canMoveItem: (sender, indexPath) => {
+                return indexPath.section === this.processSection
+            },
+            swipeEnabled: (sender, indexPath) => {
+                return indexPath.section === this.processSection
+            }
+        })
 
         listView.props.data.push({
             title: $l10n("NODE_ACTIONS"),
@@ -230,9 +249,9 @@ class Editor {
                                 items: this.actions.map(a => a.type),
                                 handler: (title, idx) => {
                                     const Action = this.actions[idx].class
-                                    const index = $(this.setting.name)?.data[2]?.rows?.length ?? 0
+                                    const index = $(this.setting.name)?.data[this.processSection]?.rows?.length ?? 0
                                     $(this.setting.name).insert({
-                                        indexPath: $indexPath(2, index),
+                                        indexPath: $indexPath(this.processSection, index),
                                         value: {
                                             props: {
                                                 info: {
