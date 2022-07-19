@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class ResolveDomainOperator extends Action {
     static height = 100
-    static type = "Resolve Domain Operator"
+    static type = "ResolveDomainOperator"
 
     constructor(data) {
         super(ResolveDomainOperator.type, data)

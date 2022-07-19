@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class RegexDeleteOperator extends Action {
     static height = 100
-    static type = "Regex Delete Operator"
+    static type = "RegexDeleteOperator"
 
     constructor(data) {
         super(RegexDeleteOperator.type, data)

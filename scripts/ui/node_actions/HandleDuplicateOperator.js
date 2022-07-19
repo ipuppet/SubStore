@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class HandleDuplicateOperator extends Action {
     static height = 100
-    static type = "Handle Duplicate Operator"
+    static type = "HandleDuplicateOperator"
 
     constructor(data) {
         super(HandleDuplicateOperator.type, data)

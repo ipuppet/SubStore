@@ -15,8 +15,8 @@ class Action {
 
     data = {}
 
-    constructor(name) {
-        this.type = name
+    constructor(type) {
+        this.type = type
     }
 
     /**
@@ -104,7 +104,7 @@ function getActions() {
         list.forEach(action => {
             action = action.replace(".js", "")
             actions.push({
-                name: action,
+                type: action,
                 class: require("./node_actions/" + action)
             })
         })

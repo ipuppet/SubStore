@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class RegionFilter extends Action {
     static height = 100
-    static type = "Region Filter"
+    static type = "RegionFilter"
 
     constructor(data) {
         super(RegionFilter.type, data)

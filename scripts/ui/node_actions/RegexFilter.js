@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class RegexFilter extends Action {
     static height = 100
-    static type = "Regex Filter"
+    static type = "RegexFilter"
 
     constructor(data) {
         super(RegexFilter.type, data)

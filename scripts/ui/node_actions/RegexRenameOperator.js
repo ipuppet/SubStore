@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class RegexRenameOperator extends Action {
     static height = 100
-    static type = "Regex Rename Operator"
+    static type = "RegexRenameOperator"
 
     constructor(data) {
         super(RegexRenameOperator.type, data)

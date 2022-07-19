@@ -204,7 +204,7 @@ class Editor {
 
         const process = this.getProcess()
 
-        console.log(process)
+        this.editorContent.process = process
 
         return this.editorContent
     }
@@ -212,78 +212,6 @@ class Editor {
     getListView() {
         const listView = this.setting.getListView()
         listView.props.template = this.settingTemplate
-        // listView.props.scrollEnabled = false
-
-        // const scrollView = {
-        //     type: "scroll",
-        //     layout: $layout.fill,
-        //     views: [listView]
-        // }
-
-        // scrollView.views.push({
-        //     type: "label",
-        //     props: {
-        //         text: $l10n("NODE_ACTIONS"),
-        //         align: $align.center
-        //     },
-        //     layout: function (make, view) {
-        //         make.center.equalTo(view.super)
-        //     }
-        // })
-        // scrollView.views.push({
-        //     type: "view",
-        //     props: {
-        //         bgcolor: $color("red")
-        //     },
-        //     views: [],
-        //     layout: (make, view) => {
-        //         make.top.equalTo(view.prev.bottom).offset(Action.offset / 2)
-        //         make.width.equalTo(view.super)
-        //         make.height.equalTo(view.super).offset(-Action.titleBarheight)
-        //     }
-        // })
-        // scrollView.views.push({
-        //     rows: [
-        //         {
-        //             type: "button",
-        //             props: {
-        //                 title: $l10n("ADD_ACTION")
-        //             },
-        //             events: {
-        //                 tapped: sender => {
-        //                     $ui.menu({
-        //                         items: this.actions.map(a => a.name),
-        //                         handler: (title, idx) => {
-        //                             const Action = this.actions[idx].class
-
-        //                             const pIndex = this.pushProcess(Action)
-
-        //                             const index = $(this.setting.name)?.data[2]?.rows?.length ?? 0
-        //                             $(this.setting.name).insert({
-        //                                 indexPath: $indexPath(2, index),
-        //                                 value: {
-        //                                     props: {
-        //                                         info: {
-        //                                             rowHeight: Action.titleBarheight + Action.height,
-        //                                             index: pIndex
-        //                                         }
-        //                                     },
-        //                                     [Action.name]: {
-        //                                         hidden: false
-        //                                     }
-        //                                 }
-        //                             })
-        //                         }
-        //                     })
-        //                 }
-        //             },
-        //             layout: (make, view) => {
-        //                 make.size.equalTo(view.super)
-        //             }
-        //         }
-        //     ],
-        //     layout: $layout.fill
-        // })
 
         listView.props.data.push({
             title: $l10n("NODE_ACTIONS"),
@@ -299,7 +227,7 @@ class Editor {
                     events: {
                         tapped: sender => {
                             $ui.menu({
-                                items: this.actions.map(a => a.name),
+                                items: this.actions.map(a => a.type),
                                 handler: (title, idx) => {
                                     const Action = this.actions[idx].class
                                     const index = $(this.setting.name)?.data[2]?.rows?.length ?? 0
@@ -311,7 +239,7 @@ class Editor {
                                                     rowHeight: Action.titleBarheight + Action.height
                                                 }
                                             },
-                                            [Action.name]: {
+                                            [Action.type]: {
                                                 hidden: false
                                             }
                                         }

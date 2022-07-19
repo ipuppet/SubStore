@@ -2,7 +2,7 @@ const { Action } = require("../action")
 
 class FlagOperator extends Action {
     static height = 100
-    static type = "Flag Operator"
+    static type = "FlagOperator"
 
     constructor() {
         super(FlagOperator.type)
