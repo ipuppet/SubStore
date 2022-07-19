@@ -60,7 +60,6 @@ class AppKernel extends Kernel {
      */
     initSettingMethods() {
         this.setting.method.readme = animate => {
-            animate.touchHighlight()
             const content = $file.read("/README.md").string
             const sheet = new Sheet()
             sheet
