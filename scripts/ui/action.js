@@ -1,3 +1,5 @@
+const { Editor } = require("./editor")
+
 class Action {
     static offset = 10
     static titleFontSize = 16
@@ -37,8 +39,9 @@ class Action {
 
         if (p) {
             const info = p.info
-            info.args[key] = value
-            p.info = info
+            const listData = $(Editor.listId).data
+            listData[Editor.processSection].rows[info.index][info.data.type].info.data.args[key] = value
+            $(Editor.listId).data = listData
         }
     }
 
@@ -65,10 +68,6 @@ class Action {
             props: {
                 selectable: false,
                 hidden: true,
-                info: {
-                    type: this.type,
-                    args: {}
-                },
                 id: this.type
             },
             views: [
@@ -95,7 +94,7 @@ class Action {
                 },
                 subView
             ],
-            layout: (make, view) => {
+            layout: make => {
                 make.edges.inset(Action.offset)
             }
         }
