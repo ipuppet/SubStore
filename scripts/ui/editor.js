@@ -248,20 +248,21 @@ class Editor {
                             $ui.menu({
                                 items: this.actions.map(a => a.type),
                                 handler: (title, idx) => {
+                                    const actionHide = {}
+                                    this.actions.forEach(a => (actionHide[a.type] = { hidden: true }))
+
                                     const Action = this.actions[idx].class
                                     const index = $(this.setting.name)?.data[this.processSection]?.rows?.length ?? 0
                                     $(this.setting.name).insert({
                                         indexPath: $indexPath(this.processSection, index),
-                                        value: {
+                                        value: Object.assign(actionHide, {
                                             props: {
                                                 info: {
                                                     rowHeight: Action.titleBarheight + Action.height
                                                 }
                                             },
-                                            [Action.type]: {
-                                                hidden: false
-                                            }
-                                        }
+                                            [Action.type]: { hidden: false }
+                                        })
                                     })
                                 }
                             })
