@@ -12,11 +12,16 @@ class Action {
      * @type {string}
      */
     type = ""
+    /**
+     * @type {string}
+     */
+    displayName = ""
 
     data = {}
 
-    constructor(type) {
+    constructor(type, displayName) {
         this.type = type
+        this.displayName = displayName
     }
 
     /**
@@ -70,7 +75,7 @@ class Action {
                 {
                     type: "label",
                     props: {
-                        text: this.type,
+                        text: this.displayName ?? this.type,
                         font: $font(Action.titleFontSize)
                     },
                     layout: (make, view) => {
@@ -103,9 +108,11 @@ function getActions() {
         const list = $file.list("scripts/ui/node_actions") ?? []
         list.forEach(action => {
             action = action.replace(".js", "")
+            const Class = require("./node_actions/" + action)
             actions.push({
-                type: action,
-                class: require("./node_actions/" + action)
+                type: Class.type,
+                displayName: Class.displayName,
+                class: Class
             })
         })
     }

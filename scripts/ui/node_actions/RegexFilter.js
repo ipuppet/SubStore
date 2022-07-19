@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class RegexFilter extends Action {
     static height = 100
-    static type = "RegexFilter"
+    static type = "Regex Filter"
+    static displayName = "RegexFilter"
 
-    constructor(data) {
-        super(RegexFilter.type, data)
+    constructor() {
+        super(RegexFilter.type, RegexFilter.displayName)
     }
 
     getView() {

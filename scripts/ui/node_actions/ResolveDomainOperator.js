@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class ResolveDomainOperator extends Action {
     static height = 100
-    static type = "ResolveDomainOperator"
+    static type = "Resolve Domain Operator"
+    static displayName = "ResolveDomainOperator"
 
-    constructor(data) {
-        super(ResolveDomainOperator.type, data)
+    constructor() {
+        super(ResolveDomainOperator.type, ResolveDomainOperator.displayName)
     }
 
     getView() {

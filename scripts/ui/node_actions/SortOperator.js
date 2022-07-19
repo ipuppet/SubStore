@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class SortOperator extends Action {
     static height = 100
-    static type = "SortOperator"
+    static type = "Sort Operator"
+    static displayName = "SortOperator"
 
-    constructor(data) {
-        super(SortOperator.type, data)
+    constructor() {
+        super(SortOperator.type, SortOperator.displayName)
     }
 
     getView() {

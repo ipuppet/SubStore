@@ -246,7 +246,7 @@ class Editor {
                     events: {
                         tapped: sender => {
                             $ui.menu({
-                                items: this.actions.map(a => a.type),
+                                items: this.actions.map(a => a.displayName ?? a.type),
                                 handler: (title, idx) => {
                                     const actionHide = {}
                                     this.actions.forEach(a => (actionHide[a.type] = { hidden: true }))

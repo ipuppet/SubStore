@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class RegionFilter extends Action {
     static height = 100
-    static type = "RegionFilter"
+    static type = "Region Filter"
+    static displayName = "RegionFilter"
 
-    constructor(data) {
-        super(RegionFilter.type, data)
+    constructor() {
+        super(RegionFilter.type, RegionFilter.displayName)
     }
 
     getView() {

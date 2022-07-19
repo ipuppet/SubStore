@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class RegexSortOperator extends Action {
     static height = 100
-    static type = "RegexSortOperator"
+    static type = "Regex Sort Operator"
+    static displayName = "RegexSortOperator"
 
-    constructor(data) {
-        super(RegexSortOperator.type, data)
+    constructor() {
+        super(RegexSortOperator.type, RegexSortOperator.displayName)
     }
 
     getView() {

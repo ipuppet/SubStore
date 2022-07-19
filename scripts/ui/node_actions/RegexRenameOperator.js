@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class RegexRenameOperator extends Action {
     static height = 100
-    static type = "RegexRenameOperator"
+    static type = "Regex Rename Operator"
+    static displayName = "RegexRenameOperator"
 
-    constructor(data) {
-        super(RegexRenameOperator.type, data)
+    constructor() {
+        super(RegexRenameOperator.type, RegexRenameOperator.displayName)
     }
 
     getView() {

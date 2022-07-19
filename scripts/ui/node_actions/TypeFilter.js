@@ -2,10 +2,11 @@ const { Action } = require("../action")
 
 class TypeFilter extends Action {
     static height = 100
-    static type = "TypeFilter"
+    static type = "Type Filter"
+    static displayName = "TypeFilter"
 
-    constructor(data) {
-        super(TypeFilter.type, data)
+    constructor() {
+        super(TypeFilter.type, TypeFilter.displayName)
     }
 
     getView() {
