@@ -33,7 +33,9 @@ class Action {
      */
     set(sender, key, value) {
         let p = sender
-        while (p !== undefined && p.id !== this.type) {
+        let max = 1000
+        while (max && p !== undefined && p.id !== this.type) {
+            --max
             p = p.super
         }
 
@@ -45,12 +47,25 @@ class Action {
         }
     }
 
+    get(sender, key, _default = null) {
+        let p = sender
+        let max = 1000
+        while (max && p !== undefined && p.id !== this.type) {
+            --max
+            p = p.super
+        }
+
+        if (p) {
+            const args = p.info?.data?.args ?? {}
+            return args[key] ?? _default
+        }
+
+        return _default
+    }
+
     createSubView(views) {
         return {
             type: "view",
-            props: {
-                bgcolor: $color("red")
-            },
             views: views,
             layout: (make, view) => {
                 make.top.equalTo(view.prev.bottom).offset(Action.offset / 2)

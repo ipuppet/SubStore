@@ -320,13 +320,18 @@ class Editor {
         return listView
     }
 
-    present() {
+    present(onSave) {
         const sheet = new Sheet()
         sheet.setView(this.getListView()).addNavBar({
             title: this.editorData.name,
             popButton: {
                 title: $l10n("SAVE"),
-                tapped: () => this.save()
+                tapped: async () => {
+                    await this.save()
+                    if (typeof onSave === "function") {
+                        onSave()
+                    }
+                }
             }
         })
         sheet.init().present()
@@ -423,13 +428,18 @@ class SubscriptionEditor extends Editor {
         return settingStructure
     }
 
-    save() {
+    async save() {
         delete this.editorData["url&content"]
         const data = super.getData()
 
         if (this.isNew) {
-            //this.kernel.api.addSubscription(data)
+            //await this.kernel.api.addSubscription(data)
         }
+        await new Promise(re =>
+            setTimeout(() => {
+                re()
+            }, 1000)
+        )
         console.log(data)
     }
 }
@@ -464,7 +474,7 @@ class CollectionEditor extends Editor {
         return settingStructure
     }
 
-    save() {
+    async save() {
         console.log(super.getData())
     }
 }

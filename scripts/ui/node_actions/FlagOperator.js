@@ -12,19 +12,21 @@ class FlagOperator extends Action {
     getView() {
         return this.createSubView([
             {
-                type: "label",
+                type: "tab",
                 props: {
-                    text: "Hello, World!",
-                    align: $align.center
+                    items: ["Add", "Remove"]
                 },
-                layout: function (make, view) {
+                layout: (make, view) => {
                     make.center.equalTo(view.super)
                 },
                 events: {
-                    tapped: sender => {
-                        sender.text = "aaa"
-                        this.set(sender, "a", "b")
-                        this.set(sender, "q", "q")
+                    ready: sender => {
+                        const mode = this.get(sender, "mode")
+                        sender.index = mode === "remove" ? 1 : 0
+                    },
+                    changed: sender => {
+                        const mode = sender.index === 0 ? "add" : "remove"
+                        this.set(sender, "mode", mode)
                     }
                 }
             }

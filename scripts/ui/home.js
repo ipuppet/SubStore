@@ -96,15 +96,18 @@ class HomeUI {
     }
 
     newEditor(type, data = undefined) {
+        let editor
         if (type === HomeUI.EditorType.Subscription) {
             // SubscriptionEditor
-            const editor = new SubscriptionEditor(this.kernel, data)
-            editor.present()
+            editor = new SubscriptionEditor(this.kernel, data)
         } else {
             // CollectionEditor
-            const editor = new CollectionEditor(this.kernel, data)
-            editor.present()
+            editor = new CollectionEditor(this.kernel, data)
         }
+        editor.present(() => {
+            // 保存完成后刷新页面
+            this.init(true)
+        })
     }
 
     deleteSubscription(name, isSubs) {

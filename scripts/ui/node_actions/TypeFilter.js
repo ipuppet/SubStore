@@ -10,22 +10,22 @@ class TypeFilter extends Action {
     }
 
     getView() {
-        return {
-            type: "view",
-            views: [
-                {
-                    type: "label",
-                    props: {
-                        text: "Hello, World!",
-                        align: $align.center
-                    },
-                    layout: function (make, view) {
-                        make.center.equalTo(view.super)
+        return this.createSubView([
+            {
+                type: "view",
+                views: [
+                    {
+                        type: "label",
+                        props: {
+                            text: "Hello, World!",
+                            align: $align.center
+                        },
+                        layout: $layout.fill
                     }
-                }
-            ],
-            layout: $layout.fill
-        }
+                ],
+                layout: $layout.fill
+            }
+        ])
     }
 }
 
