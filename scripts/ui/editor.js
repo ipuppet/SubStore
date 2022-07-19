@@ -1,4 +1,5 @@
 const { Sheet, Setting } = require("../libs/easy-jsbox")
+const { getActions } = require("./action")
 
 /**
  * @typedef {import("../app").AppKernel} AppKernel
@@ -8,22 +9,47 @@ class Editor {
     isNew = false
     editorContent = {}
 
+    quickSettingPrefix = "quick."
+    quickSettingIndex = -1
+    quickSettingItems = ["DEFAULT", "ENABLE", "DISABLE"]
+    quickSettingArgs = ["DEFAULT", "ENABLED", "DISABLED"]
+    quickSettingDefaultValue = {
+        type: "Quick Setting Operator",
+        args: {
+            useless: this.quickSettingArgs[2],
+            udp: this.quickSettingArgs[0],
+            scert: this.quickSettingArgs[0],
+            tfo: this.quickSettingArgs[0],
+            "vmess aead": this.quickSettingArgs[0]
+        }
+    }
+
     /**
      *
      * @param {AppKernel} kernel
      */
     constructor(kernel) {
         this.kernel = kernel
+        this.actions = getActions()
     }
 
     init(editorContent = {}) {
+        // editorContent.process 默认空数组
         if (editorContent.process?.length > 0) {
-            for (const iterator of editorContent.process) {
-                if (iterator.type === "Quick Setting Operator") {
-                    Object.assign(editorContent, iterator.args ?? {})
+            for (let i = 0; i < editorContent.process?.length; i++) {
+                const item = editorContent.process[i]
+                if (item.type === "Quick Setting Operator") {
+                    this.quickSettingIndex = i
                     break
                 }
             }
+        } else {
+            editorContent.process = []
+        }
+
+        if (this.quickSettingIndex === -1) {
+            editorContent.process.unshift(this.quickSettingDefaultValue)
+            this.quickSettingIndex = 0
         }
 
         this.setting = new Setting({
@@ -38,25 +64,45 @@ class Editor {
         this.editorContent = this.setting.setting
     }
 
+    /**
+     *
+     * @param {string} key
+     * @param {*} value
+     */
+    set(key, value) {
+        if (key.startsWith(this.quickSettingPrefix)) {
+            const qkey = key.replace(this.quickSettingPrefix, "")
+            this.editorContent.process[this.quickSettingIndex].args[qkey] = value
+        }
+
+        this.editorContent[key] = value
+    }
+
+    get(key, _default = null) {
+        if (key.startsWith(this.quickSettingPrefix)) {
+            const qkey = key.replace(this.quickSettingPrefix, "")
+            return this.editorContent.process[this.quickSettingIndex].args[qkey]
+        }
+
+        return this.editorContent[key] ?? _default
+    }
+
     get singleKV() {
         return {
             comment: "init process",
             key: "process",
-            value: []
+            value: [this.quickSettingDefaultValue]
         }
     }
 
     get quickSettingStructure() {
-        const Items = ["DEFAULT", "ENABLE", "DISABLE"]
-        const Args = ["DEFAULT", "ENABLED", "DISABLED"]
-
+        // 默认值在 init 函数生成
         const quickSetting = (title, key) => ({
             title,
-            key,
+            key: this.quickSettingPrefix + key,
             type: "tab",
-            items: Items,
-            values: Args,
-            value: Args[0]
+            items: this.quickSettingItems,
+            values: this.quickSettingArgs
         })
 
         return {
@@ -65,7 +111,7 @@ class Editor {
                 {
                     title: "USELESS_NODES",
                     type: "tab",
-                    key: "useless",
+                    key: this.quickSettingPrefix + "useless",
                     items: ["RETAIN", "REMOVE"],
                     values: ["DISABLED", "ENABLED"],
                     value: "DISABLED"
@@ -104,82 +150,182 @@ class Editor {
                         key: "ua"
                     }
                 ].concat(this.singleKV)
-            }
-            //this.quickSettingStructure
+            },
+            this.quickSettingStructure
         ]
     }
 
-    /**
-     *
-     * @param {string} key
-     * @param {any} value
-     */
-    set(key, value) {
-        this.editorContent[key] = value
+    get settingTemplate() {
+        const views = []
+
+        this.actions.forEach(action => {
+            const a = new action.class()
+            views.push(a.getTemplate())
+        })
+
+        return {
+            type: "view",
+            views: views,
+            layout: $layout.fill
+        }
     }
 
-    get(key, _default = null) {
-        return this.editorContent[key] ?? _default
+    getProcess() {
+        const process = []
+        const setting = $(this.setting.name)
+
+        let cellIndex = 0
+        let cellView = setting.cell($indexPath(2, cellIndex))
+
+        while (cellView) {
+            let cell = {}
+            const views = cellView.views[0].views
+            for (let i = 0; i < views.length; i++) {
+                const item = views[i]
+                if (item.hidden === false) {
+                    cell = item
+                    break
+                }
+            }
+            process.push(cell.info)
+            // 下一个 cellView
+            cellView = setting.cell($indexPath(2, ++cellIndex))
+        }
+
+        return process
+    }
+
+    getData() {
+        Object.keys(this.editorContent).forEach(key => {
+            if (key.startsWith(this.quickSettingPrefix)) {
+                delete this.editorContent[key]
+            }
+        })
+
+        const process = this.getProcess()
+
+        console.log(process)
+
+        return this.editorContent
     }
 
     getListView() {
         const listView = this.setting.getListView()
+        listView.props.template = this.settingTemplate
+        // listView.props.scrollEnabled = false
+
+        // const scrollView = {
+        //     type: "scroll",
+        //     layout: $layout.fill,
+        //     views: [listView]
+        // }
+
+        // scrollView.views.push({
+        //     type: "label",
+        //     props: {
+        //         text: $l10n("NODE_ACTIONS"),
+        //         align: $align.center
+        //     },
+        //     layout: function (make, view) {
+        //         make.center.equalTo(view.super)
+        //     }
+        // })
+        // scrollView.views.push({
+        //     type: "view",
+        //     props: {
+        //         bgcolor: $color("red")
+        //     },
+        //     views: [],
+        //     layout: (make, view) => {
+        //         make.top.equalTo(view.prev.bottom).offset(Action.offset / 2)
+        //         make.width.equalTo(view.super)
+        //         make.height.equalTo(view.super).offset(-Action.titleBarheight)
+        //     }
+        // })
+        // scrollView.views.push({
+        //     rows: [
+        //         {
+        //             type: "button",
+        //             props: {
+        //                 title: $l10n("ADD_ACTION")
+        //             },
+        //             events: {
+        //                 tapped: sender => {
+        //                     $ui.menu({
+        //                         items: this.actions.map(a => a.name),
+        //                         handler: (title, idx) => {
+        //                             const Action = this.actions[idx].class
+
+        //                             const pIndex = this.pushProcess(Action)
+
+        //                             const index = $(this.setting.name)?.data[2]?.rows?.length ?? 0
+        //                             $(this.setting.name).insert({
+        //                                 indexPath: $indexPath(2, index),
+        //                                 value: {
+        //                                     props: {
+        //                                         info: {
+        //                                             rowHeight: Action.titleBarheight + Action.height,
+        //                                             index: pIndex
+        //                                         }
+        //                                     },
+        //                                     [Action.name]: {
+        //                                         hidden: false
+        //                                     }
+        //                                 }
+        //                             })
+        //                         }
+        //                     })
+        //                 }
+        //             },
+        //             layout: (make, view) => {
+        //                 make.size.equalTo(view.super)
+        //             }
+        //         }
+        //     ],
+        //     layout: $layout.fill
+        // })
 
         listView.props.data.push({
             title: $l10n("NODE_ACTIONS"),
+            rows: []
+        })
+        listView.props.data.push({
             rows: [
                 {
-                    type: "view",
+                    type: "button",
                     props: {
-                        id: "sadf",
-                        info: {
-                            rowHeight: 50
-                        }
+                        title: $l10n("ADD_ACTION")
                     },
-                    views: [
-                        {
-                            type: "button",
-                            props: {
-                                title: $l10n("ADD_ACTION")
-                            },
-                            events: {
-                                // TODO 添加节点操作
-                                tapped: sender => {
-                                    return
-                                    const Action = require("./node_actions/QuickSettingStructure")
-                                    const action = new Action({})
-
-                                    const length = $(this.setting.name)?.data[1]?.rows?.length ?? 0
+                    events: {
+                        tapped: sender => {
+                            $ui.menu({
+                                items: this.actions.map(a => a.name),
+                                handler: (title, idx) => {
+                                    const Action = this.actions[idx].class
+                                    const index = $(this.setting.name)?.data[2]?.rows?.length ?? 0
                                     $(this.setting.name).insert({
-                                        indexPath: $indexPath(1, length),
-                                        value: action.getView()
-                                    })
-
-                                    return
-                                    $ui.menu({
-                                        items: ["QuickSettingOperator"],
-                                        handler: (title, idx) => {
-                                            const Action = require("./node_actions/QuickSettingStructure")
-                                            const action = new Action({})
-
-                                            //console.log($(this.setting.name).data)
-
-                                            const data = $(this.setting.name).data
-                                            data[1].rows.push(action.getView())
-
-                                            $(this.setting.name).data = data
+                                        indexPath: $indexPath(2, index),
+                                        value: {
+                                            props: {
+                                                info: {
+                                                    rowHeight: Action.titleBarheight + Action.height
+                                                }
+                                            },
+                                            [Action.name]: {
+                                                hidden: false
+                                            }
                                         }
                                     })
                                 }
-                            },
-                            layout: (make, view) => {
-                                make.size.equalTo(view.super)
-                            }
+                            })
                         }
-                    ],
-                    layout: $layout.fill
+                    },
+                    layout: (make, view) => {
+                        make.size.equalTo(view.super)
+                    }
                 }
-            ]
+            ],
+            layout: $layout.fill
         })
 
         return listView
@@ -294,12 +440,13 @@ class SubscriptionEditor extends Editor {
 
     save() {
         delete this.editorContent["url&content"]
+        const data = super.getData()
 
         //this.editorContent.process.unshift(this.quickSettingOperator)
         if (this.isNew) {
             //this.kernel.api.addSubscription(this.editorContent)
         }
-        console.log(this.editorContent)
+        console.log(data)
     }
 }
 
