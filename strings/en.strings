@@ -32,9 +32,9 @@
 "COMMON_SETTINGS" = "Common Settings";
 "RETAIN" = "Retain";
 "REMOVE" = "Remove";
-"DEFAULT" = "N";
-"ENABLE" = "T";
-"DISABLE" = "F";
+"DEFAULT" = "-";
+"ENABLE" = "ON";
+"DISABLE" = "OFF";
 "USELESS_NODES" = "Useless Nodes";
 "UDP_RELAY" = "UDP Relay";
 "SKIP_TLS_VERIFY" = "Skip TLS Verify";
