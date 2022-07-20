@@ -40,10 +40,10 @@ class Action {
         }
 
         if (p) {
-            const info = p.info
-            const listData = $(Editor.listId).data
-            listData[Editor.processSection].rows[info.index][info.data.type].info.data.args[key] = value
-            $(Editor.listId).data = listData
+            const rowInfo = p.info
+            const listInfo = $(Editor.listId).info
+            listInfo.process[rowInfo.uuid].args[key] = value
+            $(Editor.listId).info = listInfo
         }
     }
 
@@ -56,8 +56,9 @@ class Action {
         }
 
         if (p) {
-            const args = p.info?.data?.args ?? {}
-            return args[key] ?? _default
+            const rowInfo = p.info
+            const listInfo = $(Editor.listId).info
+            return listInfo.process[rowInfo?.uuid]?.args[key] ?? _default
         }
 
         return _default

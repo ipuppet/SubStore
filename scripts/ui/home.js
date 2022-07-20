@@ -106,7 +106,7 @@ class HomeUI {
         }
         editor.present(() => {
             // 保存完成后刷新页面
-            this.init(true)
+            //this.init(true)
         })
     }
 

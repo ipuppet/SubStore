@@ -211,12 +211,13 @@ class Editor {
     getProcess() {
         const process = []
         const setting = $(Editor.listId)
+        const savedProcess = setting.info.process
 
         setting.data[Editor.processSection].rows.forEach(row => {
             const keys = Object.keys(row)
             for (let i = 0; i < keys.length; i++) {
                 if (row[keys[i]].hidden === false) {
-                    process.push(row[keys[i]].info.data)
+                    process.push(savedProcess[row[keys[i]].info.uuid])
                 }
             }
         })
@@ -244,6 +245,7 @@ class Editor {
 
         const Action = this.actions[idx].class
         const insertIndex = $(Editor.listId)?.data[Editor.processSection]?.rows?.length ?? 0
+        const uuid = this.kernel.uuid()
         $(Editor.listId).insert({
             indexPath: $indexPath(Editor.processSection, insertIndex),
             value: Object.assign(actionHide, {
@@ -256,19 +258,25 @@ class Editor {
                     hidden: false,
                     info: {
                         index: insertIndex,
-                        data: {
-                            type: Action.type,
-                            args
-                        }
+                        uuid,
+                        type: Action.type,
+                        args
                     }
                 }
             })
         })
+        const listInfo = $(Editor.listId).info
+        listInfo.process[uuid] = {
+            type: Action.type,
+            args
+        }
+        $(Editor.listId).info = listInfo
     }
 
     getListView() {
         const listView = this.setting.getListView()
         Object.assign(listView.props, {
+            info: { process: {} },
             template: this.settingTemplate,
             reorder: true,
             crossSections: false,
@@ -429,18 +437,22 @@ class SubscriptionEditor extends Editor {
     }
 
     async save() {
-        delete this.editorData["url&content"]
-        const data = super.getData()
+        try {
+            delete this.editorData["url&content"]
+            const data = super.getData()
 
-        if (this.isNew) {
-            //await this.kernel.api.addSubscription(data)
+            if (this.isNew) {
+                //await this.kernel.api.addSubscription(data)
+            }
+            // await new Promise(re =>
+            //     setTimeout(() => {
+            //         re()
+            //     }, 1000)
+            // )
+            console.log(data)
+        } catch (error) {
+            console.error(error)
         }
-        await new Promise(re =>
-            setTimeout(() => {
-                re()
-            }, 1000)
-        )
-        console.log(data)
     }
 }
 
