@@ -15,6 +15,7 @@
 "CONTAINS_SUBS" = "包含订阅";
 "EXPIRE" = "过期日期";
 "USAGE" = "用量";
+"LOCAL_SUBSCRIPTION" = "本地订阅";
 
 "DELETE" = "删除";
 "EDIT" = "编辑";

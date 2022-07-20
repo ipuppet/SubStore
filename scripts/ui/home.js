@@ -23,11 +23,11 @@ class HomeUI {
         this.rowEdge = 10
     }
 
-    async init(clearCache = false) {
+    async init(clearUsageCache = false) {
         try {
             const list = $(this.listId)
             list.data = []
-            if (clearCache) {
+            if (clearUsageCache) {
                 this.kernel.api.clearCache()
             }
             list.data = await this.getData()
@@ -48,7 +48,10 @@ class HomeUI {
                     rows: this.subscriptions.map(item => ({
                         icon: {},
                         name: { text: item.name },
-                        usage: { hidden: false },
+                        usage: {
+                            hidden: false,
+                            text: item.source === "local" ? $l10n("LOCAL_SUBSCRIPTION") : ""
+                        },
                         expire: { hidden: false },
                         contains: { hidden: true },
                         info: { info: item }
@@ -83,6 +86,9 @@ class HomeUI {
         try {
             const list = $(this.listId)
             this.subscriptions.forEach(async (item, index) => {
+                if (item.source === "local") {
+                    return
+                }
                 const resp = await this.kernel.api.getUsage(item.url)
                 const cell = list.cell($indexPath(0, index))
                 cell.get("expire").text = $l10n("EXPIRE") + ": " + new Date(Number(resp.expire) * 1000).toLocaleDateString()
@@ -105,8 +111,8 @@ class HomeUI {
             editor = new CollectionEditor(this.kernel, data)
         }
         editor.present(() => {
-            // 保存完成后刷新页面
-            //this.init(true)
+            // 保存完成后刷新页面，不需要刷新 Usage 缓存
+            this.init()
         })
     }
 

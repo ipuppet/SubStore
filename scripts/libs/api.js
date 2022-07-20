@@ -3,32 +3,34 @@ class SubStore {
         this.baseURL = baseURL
     }
 
+    static get cache() {
+        return $cache.get("substore.cache") ?? {}
+    }
+
     getCache(key, _default = null) {
-        const cache = $cache.get("substore.cache." + key)
-        if (cache) {
-            return cache
-        }
-        return _default
+        const cache = SubStore.cache
+        return cache[key] ?? _default
     }
 
     setCache(key, data) {
         if (!data || typeof data !== "string") {
             return
         }
-        $cache.set("substore.cache." + key, data)
-    }
-
-    removeCache(key) {
-        $cache.remove("substore.cache." + key)
+        const cache = SubStore.cache
+        cache[key] = data
+        $cache.set("substore.cache", cache)
     }
 
     clearCache() {
-        $cache.clear()
+        $cache.remove("substore.cache")
     }
 
     async #request(url, method, body = {}) {
         try {
             const resp = await $http.request({
+                header: {
+                    "User-Agent": "Quantumult%20X/1.0.30 (iPhone14,2; iOS 15.6)"
+                },
                 url,
                 method,
                 body
@@ -49,7 +51,7 @@ class SubStore {
     async requestWithBaseURL(path, method, body = {}) {
         const resp = await this.#request(this.baseURL + path, method, body)
         if (resp?.data?.status !== "success") {
-            throw new Error("http error: [" + resp.response.statusCode + "] " + resp.data.message)
+            throw new Error(`${method} ${this.baseURL + path} [${resp.response.statusCode}] ${resp.data}`)
         }
         return resp.data.data
     }
@@ -81,6 +83,10 @@ class SubStore {
         return await this.requestWithBaseURL("/api/subs", "POST", body)
     }
 
+    async updateSubscription(name, body) {
+        return await this.requestWithBaseURL("/api/sub/" + name, "PATCH", body)
+    }
+
     async deleteSubscription(name) {
         return await this.requestWithBaseURL("/api/sub/" + name, "DELETE")
     }
@@ -91,6 +97,10 @@ class SubStore {
 
     async addCollection(body) {
         return await this.requestWithBaseURL("/api/collections", "POST", body)
+    }
+
+    async updateCollection(name, body) {
+        return await this.requestWithBaseURL("/api/collection/" + name, "PATCH", body)
     }
 
     async deleteCollection(name) {

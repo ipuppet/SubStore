@@ -1,4 +1,4 @@
-const { Sheet, Setting } = require("../libs/easy-jsbox")
+const { Sheet, Setting, PageController } = require("../libs/easy-jsbox")
 
 /**
  * @typedef {import("../app").AppKernel} AppKernel
@@ -10,6 +10,7 @@ class Editor {
 
     isNew = false
     editorData = {}
+    originalName = ""
     actions = []
 
     quickSettingPrefix = "quick."
@@ -40,6 +41,7 @@ class Editor {
 
         if (editorData) {
             this.editorData = editorData
+            this.originalName = editorData.name
         } else {
             this.editorData = defaultData
             this.isNew = true
@@ -309,6 +311,9 @@ class Editor {
                     },
                     events: {
                         tapped: sender => {
+                            // TODO 节点操作
+                            $ui.alert("Not supported yet")
+                            return
                             $ui.menu({
                                 items: this.actions.map(a => a.displayName ?? a.type),
                                 handler: (title, idx) => {
@@ -332,15 +337,22 @@ class Editor {
         const sheet = new Sheet()
         sheet.setView(this.getListView()).addNavBar({
             title: this.editorData.name,
-            popButton: {
-                title: $l10n("SAVE"),
-                tapped: async () => {
-                    await this.save()
-                    if (typeof onSave === "function") {
-                        onSave()
+            popButton: { title: "Cancel" },
+            rightButtons: [
+                {
+                    title: $l10n("SAVE"),
+                    tapped: async () => {
+                        try {
+                            await this.save()
+                            if (typeof onSave === "function") {
+                                onSave()
+                            }
+                        } catch (error) {
+                            $ui.error(error)
+                        }
                     }
                 }
-            }
+            ]
         })
         sheet.init().present()
     }
@@ -437,21 +449,13 @@ class SubscriptionEditor extends Editor {
     }
 
     async save() {
-        try {
-            delete this.editorData["url&content"]
-            const data = super.getData()
+        delete this.editorData["url&content"]
+        const data = super.getData()
 
-            if (this.isNew) {
-                //await this.kernel.api.addSubscription(data)
-            }
-            // await new Promise(re =>
-            //     setTimeout(() => {
-            //         re()
-            //     }, 1000)
-            // )
-            console.log(data)
-        } catch (error) {
-            console.error(error)
+        if (this.isNew) {
+            await this.kernel.api.addSubscription(data)
+        } else {
+            await this.kernel.api.updateSubscription(this.originalName, data)
         }
     }
 }
@@ -472,6 +476,7 @@ class CollectionEditor extends Editor {
      */
     constructor(kernel, editorData) {
         super(kernel, editorData, CollectionEditor.defaultData)
+        this.editorData["subscriptionsString"] = this.editorData.subscriptions.join(",") ?? ""
         this.init()
     }
 
@@ -481,13 +486,39 @@ class CollectionEditor extends Editor {
             icon: ["link", "#FF99CC"],
             title: "subscriptions",
             type: "string",
-            key: "subscriptions"
+            key: "subscriptionsString"
         })
         return settingStructure
     }
 
+    set(key, value) {
+        if (key === "subscriptions") {
+            this.editorData["subscriptionsString"] = value.subscriptions.join(",")
+        } else {
+            super.set(key, value)
+        }
+    }
+
+    get(key, _default = null) {
+        if (key === "subscriptions") {
+            return this.editorData["subscriptionsString"]?.split(",").map(item => item.trim())
+        }
+
+        return super.get(key, _default)
+    }
+
     async save() {
-        console.log(super.getData())
+        const subscriptions = this.get("subscriptions")
+        delete this.editorData["subscriptionsString"]
+        const data = super.getData()
+        data.subscriptions = subscriptions
+
+        if (this.isNew) {
+            await this.kernel.api.addCollection(data)
+        } else {
+            await this.kernel.api.updateCollection(this.originalName, data)
+        }
+        console.log(data)
     }
 }
 

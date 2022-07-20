@@ -15,6 +15,7 @@
 "CONTAINS_SUBS" = "Contains Subs";
 "EXPIRE" = "Expire";
 "USAGE" = "Usage";
+"LOCAL_SUBSCRIPTION" = "Local Subscription";
 
 "DELETE" = "Delete";
 "EDIT" = "Edit";
