@@ -106,6 +106,10 @@ class SubStore {
     async deleteCollection(name) {
         return await this.requestWithBaseURL("/api/collection/" + name, "DELETE")
     }
+
+    async preview(body) {
+        return await this.requestWithBaseURL("/api/preview/sub", "POST", body)
+    }
 }
 
 module.exports = { SubStore }

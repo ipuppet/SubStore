@@ -1,4 +1,4 @@
-const { UIKit, PageController } = require("../libs/easy-jsbox")
+const { UIKit, PageController, Sheet } = require("../libs/easy-jsbox")
 const { SubscriptionEditor, CollectionEditor } = require("./editor")
 
 /**
@@ -245,13 +245,36 @@ class HomeUI {
             },
             {
                 title: $l10n("EDIT"),
-                color: $color("green"),
+                color: $color("#33CC33"),
                 handler: (sender, indexPath) => {
                     const info = sender.object(indexPath).info.info
                     this.newEditor(indexPath.section, info)
                 }
             }
         ]
+    }
+
+    preview(name, original, processed) {
+        // TODO 差异预览
+        return
+        const sheet = new Sheet()
+        sheet
+            .setView({
+                type: "web",
+                props: {
+                    url: "https://www.apple.com",
+                    progress: false,
+                    transparent: true,
+                    showsProgress: false,
+                    allowsNavigation: false,
+                    allowsLinkPreview: false
+                },
+                layout: $layout.fill
+            })
+            .addNavBar({
+                title: name
+            })
+        sheet.init().present()
     }
 
     getListView() {
@@ -267,10 +290,15 @@ class HomeUI {
             layout: $layout.fill,
             events: {
                 ready: () => this.init(),
-                didSelect: (sender, indexPath, data) => {
-                    // TODO 差异预览
-                    const info = data.info.info
-                    this.newEditor(indexPath.section, info)
+                didSelect: async (sender, indexPath, data) => {
+                    try {
+                        const info = data.info.info
+                        const preview = await this.kernel.api.preview(info)
+                        this.preview(info.name, preview.original, preview.processed)
+                    } catch (error) {
+                        this.kernel.print(error)
+                        $ui.error(error)
+                    }
                 }
             }
         }
