@@ -46,7 +46,7 @@ class HomeUI {
                 {
                     title: $l10n("SUBSCRIPTION"),
                     rows: this.subscriptions.map(item => ({
-                        icon: {},
+                        icon: item.icon ? { src: item.icon } : { symbol: "link" },
                         name: { text: item.name },
                         usage: {
                             hidden: false,
@@ -60,7 +60,7 @@ class HomeUI {
                 {
                     title: $l10n("COLLECTION"),
                     rows: this.collections.map(item => ({
-                        icon: {},
+                        icon: item.icon ? { src: item.icon } : { symbol: "link" },
                         name: { text: item.name },
                         usage: { hidden: true },
                         expire: { hidden: true },
@@ -138,8 +138,7 @@ class HomeUI {
                 {
                     type: "image",
                     props: {
-                        id: "icon",
-                        symbol: "link"
+                        id: "icon"
                     },
                     layout: make => {
                         make.left.top.inset(this.rowEdge)
