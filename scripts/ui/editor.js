@@ -1,4 +1,4 @@
-const { Sheet, Setting, PageController } = require("../libs/easy-jsbox")
+const { Sheet, Setting } = require("../libs/easy-jsbox")
 
 /**
  * @typedef {import("../app").AppKernel} AppKernel
@@ -336,7 +336,7 @@ class Editor {
     present(onSave) {
         const sheet = new Sheet()
         sheet.setView(this.getListView()).addNavBar({
-            title: this.editorData.name,
+            title: this.isNew ? this.editorName : this.editorData.name,
             popButton: { title: "Cancel" },
             rightButtons: [
                 {
@@ -381,6 +381,8 @@ class SubscriptionEditor extends Editor {
         content: "",
         process: []
     }
+
+    editorName = $l10n("SUBSCRIPTION")
 
     /**
      *
@@ -468,6 +470,8 @@ class CollectionEditor extends Editor {
         subscriptions: [],
         process: []
     }
+
+    editorName = $l10n("COLLECTION")
 
     /**
      *
