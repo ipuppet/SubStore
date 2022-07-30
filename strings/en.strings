@@ -21,6 +21,7 @@
 "EDIT" = "Edit";
 
 "SAVE" = "Save";
+"SAVE_SUCCESS" = "Save Success";
 "GENERAL" = "General";
 "NAME" = "Name";
 "ICON" = "Icon";

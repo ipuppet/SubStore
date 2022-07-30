@@ -8,6 +8,7 @@ class Editor {
     static listId = "list-editor"
     static processSection = 2
 
+    saveLock = false
     isNew = false
     editorData = {}
     originalName = ""
@@ -342,12 +343,17 @@ class Editor {
                 {
                     title: $l10n("SAVE"),
                     tapped: async () => {
+                        if (this.saveLock) return
+                        this.saveLock = true
                         try {
                             await this.save()
                             if (typeof onSave === "function") {
                                 onSave()
                             }
+                            $ui.success($l10n("SAVE_SUCCESS"))
+                            $delay(0.8, () => sheet.dismiss())
                         } catch (error) {
+                            this.saveLock = false
                             $ui.error(error)
                         }
                     }

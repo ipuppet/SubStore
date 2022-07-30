@@ -21,6 +21,7 @@
 "EDIT" = "编辑";
 
 "SAVE" = "保存";
+"SAVE_SUCCESS" = "保存成功";
 "GENERAL" = "通用";
 "NAME" = "名称";
 "ICON" = "图标";
