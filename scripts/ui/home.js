@@ -1,4 +1,4 @@
-const { UIKit, PageController, Sheet } = require("../libs/easy-jsbox")
+const { UIKit, PageController, Sheet, NavigationItem } = require("../libs/easy-jsbox")
 const { SubscriptionEditor, CollectionEditor } = require("./editor")
 
 /**
@@ -254,27 +254,112 @@ class HomeUI {
         ]
     }
 
-    preview(name, original, processed) {
-        // TODO 差异预览
-        return
-        const sheet = new Sheet()
-        sheet
-            .setView({
-                type: "web",
-                props: {
-                    url: "https://www.apple.com",
-                    progress: false,
-                    transparent: true,
-                    showsProgress: false,
-                    allowsNavigation: false,
-                    allowsLinkPreview: false
+    async preview(name, original, processed) {
+        const html = $file.read("assets/diff.html").string
+        const fontSize = 16
+        const fontHeight = $text.sizeThatFits({
+            text: "A",
+            width: fontSize,
+            font: $font(fontSize)
+        }).height
+        const rowHeight = fontSize * 2 + this.rowEdge * 5
+
+        const indexTemplate = (id, color, labelProps = {}) => {
+            return {
+                type: "view",
+                props: { info: { preview: true } },
+                views: [
+                    {
+                        type: "view",
+                        props: { bgcolor: color },
+                        layout: (make, view) => {
+                            make.left.inset(this.rowEdge)
+                            make.centerY.equalTo(view.super)
+                            make.size.equalTo(10)
+                        }
+                    },
+                    {
+                        type: "label",
+                        props: {
+                            id: id,
+                            font: $font(fontSize),
+                            ...labelProps
+                        },
+                        layout: (make, view) => {
+                            make.left.equalTo(view.prev.right).offset(this.rowEdge)
+                        }
+                    }
+                ],
+                layout: (make, view) => {
+                    if (view.prev?.info?.preview) {
+                        make.top.equalTo(view.prev.bottom).offset(this.rowEdge)
+                    } else {
+                        make.top.inset(this.rowEdge * 2)
+                    }
+                    make.left.inset(this.rowEdge)
+                    make.height.equalTo(fontHeight)
+                }
+            }
+        }
+        const template = {
+            views: [
+                {
+                    props: { id: "info" }
                 },
-                layout: $layout.fill
+                indexTemplate("processed", $color("#33CC33")),
+                indexTemplate("original", $color("red"), {
+                    textColor: $color("lightGray")
+                })
+            ]
+        }
+
+        let data = []
+        for (let i = processed.length - 1; i >= 0; --i) {
+            data.push({
+                info: {
+                    info: {
+                        processed: processed[i],
+                        original: original[i]
+                    }
+                },
+                processed: { text: processed[i].name },
+                original: { text: original[i].name }
             })
-            .addNavBar({
-                title: name
-            })
-        sheet.init().present()
+        }
+
+        const pageController = new PageController()
+        pageController.setView({
+            type: "list",
+            props: {
+                rowHeight: rowHeight,
+                data: data.reverse(),
+                template: template
+            },
+            layout: $layout.fill,
+            events: {
+                didSelect: (sender, indexPath, data) => {
+                    const info = data.info.info
+                    const sheet = new Sheet()
+                    sheet
+                        .setView({
+                            type: "web",
+                            props: {
+                                html,
+                                transparent: true,
+                                showsProgress: false,
+                                script: `diff(\`${JSON.stringify(info.original, null, 4)}\`, \`${JSON.stringify(info.processed, null, 4)}\`)`
+                            },
+                            layout: $layout.fill
+                        })
+                        .addNavBar({
+                            title: "Diff"
+                        })
+                    sheet.init().present()
+                }
+            }
+        })
+        pageController.navigationItem.setTitle(name).setLargeTitleDisplayMode(NavigationItem.largeTitleDisplayModeNever)
+        this.kernel.viewController.push(pageController)
     }
 
     getListView() {
@@ -291,6 +376,8 @@ class HomeUI {
             events: {
                 ready: () => this.init(),
                 didSelect: async (sender, indexPath, data) => {
+                    const loading = UIKit.loading()
+                    loading.start()
                     try {
                         const info = data.info.info
                         const preview = await this.kernel.api.preview(info)
@@ -298,6 +385,8 @@ class HomeUI {
                     } catch (error) {
                         this.kernel.print(error)
                         $ui.error(error)
+                    } finally {
+                        loading.end()
                     }
                 }
             }

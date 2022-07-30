@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;" name="viewport" />
+        <title>Diff</title>
+
+        <script src="local://assets/diff.min.js"></script>
+    </head>
+    <body>
+        <pre id="display"></pre>
+
+        <script>
+            function diff(oldStr, newStr) {
+                const diff = Diff.diffJson(oldStr, newStr),
+                    display = document.getElementById("display"),
+                    fragment = document.createDocumentFragment()
+
+                diff.forEach(part => {
+                    // green for additions, red for deletions
+                    // grey for common parts
+                    const color = part.added ? "green" : part.removed ? "red" : "grey"
+                    let span = document.createElement("span")
+                    span.style.color = color
+                    span.appendChild(document.createTextNode(part.value))
+                    fragment.appendChild(span)
+                })
+                console.log(fragment)
+                display.appendChild(fragment)
+            }
+        </script>
+    </body>
+</html>
