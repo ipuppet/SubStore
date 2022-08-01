@@ -47,3 +47,6 @@
 
 "NODE_ACTIONS" = "Node Actions";
 "ADD_ACTION" = "Add Action";
+
+"TYPE" = "Type";
+"PLATFORM" = "Platform";

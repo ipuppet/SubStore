@@ -133,6 +133,14 @@ class SubStore {
     async deleteArtifact(name) {
         return await this.requestWithBaseURL("/api/artifact/" + name, "DELETE")
     }
+
+    async addArtifact(body) {
+        return await this.requestWithBaseURL("/api/artifacts", "POST", body)
+    }
+
+    async updateArtifact(name, body) {
+        return await this.requestWithBaseURL("/api/artifact/" + name, "PATCH", body)
+    }
 }
 
 module.exports = { SubStore }

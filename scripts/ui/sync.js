@@ -1,10 +1,12 @@
 const { UIKit, PageController } = require("../libs/easy-jsbox")
+const { ArtifactEditor } = require("./editor")
 
 /**
  * @typedef {import("../app").AppKernel} AppKernel
  */
 
 class SyncUI {
+    saveLock = false
     artifacts = []
 
     /**
@@ -39,17 +41,25 @@ class SyncUI {
                     type: { text: typeL10n(item.type) },
                     source: { text: item.source },
                     updated: { text: item.updated ? new Date(item.updated).toLocaleString() : $l10n("NO_SYNC") },
-                    info: { info: item }
+                    sync: { info: item, on: item.sync ?? false }
                 }))
             }
         ]
     }
 
-    newSyncEditor(data = undefined) {
-        $ui.alert("Not supported yet")
+    async newArtifactEditor(data = undefined) {
+        const subscriptions = await this.kernel.api.getSubscriptions()
+        const collections = await this.kernel.api.getCollections()
+
+        const editor = new ArtifactEditor(this.kernel, data, subscriptions, collections)
+
+        editor.present(() => {
+            // 保存完成后刷新页面
+            this.init()
+        })
     }
 
-    deleteSync(name) {
+    deleteArtifact(name) {
         this.kernel.deleteConfirm(`Are you sure you want to delete ${name}?`, async () => {
             try {
                 await this.kernel.api.deleteArtifact(name)
@@ -59,6 +69,22 @@ class SyncUI {
                 this.kernel.print(error)
             }
         })
+    }
+
+    async updateArtifact(name, data) {
+        if (this.saveLock) {
+            throw "Please wait for other tasks to be completed"
+        }
+        this.saveLock = true
+        try {
+            await this.kernel.api.updateArtifact(name, data)
+            await this.init()
+        } catch (error) {
+            $ui.alert(error)
+            throw error
+        } finally {
+            this.saveLock = false
+        }
     }
 
     get listTemplate() {
@@ -135,20 +161,49 @@ class SyncUI {
                     }
                 },
                 {
-                    type: "switch",
-                    props: {
-                        hidden: true, // TODO 定时
-                        id: "info"
-                    },
-                    events: {
-                        changed: sender => {
-                            const status = sender.on
-                            const info = sender.info
-                            console.log(info)
+                    type: "view",
+                    views: [
+                        {
+                            type: "switch",
+                            props: { id: "sync" },
+                            events: {
+                                changed: async sender => {
+                                    // 锁定按钮，防止重复点击
+                                    sender.userInteractionEnabled = false
+                                    sender.alpha = 0.5
+                                    try {
+                                        const info = sender.info
+                                        info.sync = sender.on
+                                        await this.updateArtifact(info.name, info)
+                                    } catch (error) {
+                                        sender.on = !sender.on
+                                    } finally {
+                                        // 解锁
+                                        sender.userInteractionEnabled = true
+                                        sender.alpha = 1
+                                    }
+                                }
+                            },
+                            layout: make => {
+                                make.right.bottom.inset(0)
+                            }
+                        },
+                        {
+                            type: "label",
+                            props: {
+                                text: $l10n("SYNC"),
+                                font: $font(16)
+                            },
+                            layout: (make, view) => {
+                                make.centerY.equalTo(view.prev)
+                                make.right.equalTo(view.prev.left).offset(-this.rowEdge)
+                            }
                         }
-                    },
+                    ],
                     layout: make => {
                         make.right.bottom.inset(10)
+                        // 至少开关大小，否则无法点击
+                        make.size.equalTo($size(50, 30))
                     }
                 }
             ]
@@ -163,15 +218,15 @@ class SyncUI {
                 color: $color("red"),
                 handler: (sender, indexPath) => {
                     const info = sender.object(indexPath).info.info
-                    this.deleteSync(info.name)
+                    this.deleteArtifact(info.name)
                 }
             },
             {
                 title: $l10n("EDIT"),
                 color: $color("#33CC33"),
                 handler: (sender, indexPath) => {
-                    const info = sender.object(indexPath).info.info
-                    this.newSyncEditor(info)
+                    const info = sender.object(indexPath).sync.info
+                    this.newArtifactEditor(info)
                 }
             }
         ]
@@ -200,7 +255,7 @@ class SyncUI {
             {
                 symbol: "plus.circle",
                 tapped: () => {
-                    this.newSyncEditor()
+                    this.newArtifactEditor()
                 }
             },
             {

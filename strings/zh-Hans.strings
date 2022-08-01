@@ -47,3 +47,6 @@
 
 "NODE_ACTIONS" = "节点操作";
 "ADD_ACTION" = "添加操作";
+
+"TYPE" = "类型";
+"PLATFORM" = "平台";

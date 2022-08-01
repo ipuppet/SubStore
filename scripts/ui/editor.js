@@ -6,12 +6,88 @@ const { Sheet, Setting } = require("../libs/easy-jsbox")
 
 class Editor {
     static listId = "list-editor"
-    static processSection = 2
 
     saveLock = false
     isNew = false
     editorData = {}
     originalName = ""
+
+    /**
+     *
+     * @param {AppKernel} kernel
+     */
+    constructor(kernel, editorData, defaultData) {
+        this.kernel = kernel
+
+        if (editorData) {
+            this.editorData = editorData
+            this.originalName = editorData.name
+        } else {
+            this.editorData = defaultData
+            this.isNew = true
+        }
+    }
+
+    init() {
+        this.setting = new Setting({
+            name: Editor.listId,
+            set: (key, value) => this.set(key, value),
+            get: (key, _default = null) => this.get(key, _default),
+            structure: this.settingStructure,
+            userData: this.editorData
+        })
+        this.setting.footer = {}
+        this.setting.loadConfig()
+
+        this.editorData = this.setting.setting
+    }
+
+    set(key, value) {
+        // 值未改变则直接返回
+        if (value === this.get(key)) {
+            return
+        }
+
+        this.editorData[key] = value
+    }
+
+    get(key, _default = null) {
+        return this.editorData[key] ?? _default
+    }
+
+    present(onSave) {
+        const sheet = new Sheet()
+        sheet.setView(this.getListView()).addNavBar({
+            title: this.isNew ? this.editorName : this.editorData.name,
+            popButton: { title: "Cancel" },
+            rightButtons: [
+                {
+                    title: $l10n("SAVE"),
+                    tapped: async () => {
+                        if (this.saveLock) return
+                        this.saveLock = true
+                        try {
+                            await this.save()
+                            if (typeof onSave === "function") {
+                                onSave()
+                            }
+                            $ui.success($l10n("SAVE_SUCCESS"))
+                            $delay(0.8, () => sheet.dismiss())
+                        } catch (error) {
+                            this.saveLock = false
+                            $ui.alert(error)
+                        }
+                    }
+                }
+            ]
+        })
+        sheet.init().present()
+    }
+}
+
+class NodeEditor extends Editor {
+    static processSection = 2
+
     actions = []
 
     quickSettingPrefix = "quick."
@@ -34,19 +110,11 @@ class Editor {
      * @param {AppKernel} kernel
      */
     constructor(kernel, editorData, defaultData) {
-        this.kernel = kernel
+        super(kernel, editorData, defaultData)
 
         // 防止循环引用
         const { getActions } = require("./action")
         this.actions = getActions()
-
-        if (editorData) {
-            this.editorData = editorData
-            this.originalName = editorData.name
-        } else {
-            this.editorData = defaultData
-            this.isNew = true
-        }
     }
 
     getActionIndex(type) {
@@ -62,18 +130,7 @@ class Editor {
 
     init() {
         this.initQuickSetting()
-
-        this.setting = new Setting({
-            name: Editor.listId,
-            set: (key, value) => this.set(key, value),
-            get: (key, _default = null) => this.get(key, _default),
-            structure: this.settingStructure,
-            userData: this.editorData
-        })
-        this.setting.footer = {}
-        this.setting.loadConfig()
-
-        this.editorData = this.setting.setting
+        super.init()
     }
 
     initQuickSetting() {
@@ -116,7 +173,7 @@ class Editor {
             this.editorData.process[this.quickSettingIndex].args[qkey] = value
         }
 
-        this.editorData[key] = value
+        super.set(key, value)
     }
 
     get(key, _default = null) {
@@ -125,7 +182,7 @@ class Editor {
             return this.editorData.process[this.quickSettingIndex].args[qkey]
         }
 
-        return this.editorData[key] ?? _default
+        return super.get(key, _default)
     }
 
     get singleKV() {
@@ -216,7 +273,7 @@ class Editor {
         const setting = $(Editor.listId)
         const savedProcess = setting.info.process
 
-        setting.data[Editor.processSection].rows.forEach(row => {
+        setting.data[NodeEditor.processSection].rows.forEach(row => {
             const keys = Object.keys(row)
             for (let i = 0; i < keys.length; i++) {
                 if (row[keys[i]].hidden === false) {
@@ -251,10 +308,10 @@ class Editor {
         this.actions.forEach(a => (actionHide[a.type] = { hidden: true }))
 
         const Action = this.actions[idx].class
-        const insertIndex = $(Editor.listId)?.data[Editor.processSection]?.rows?.length ?? 0
+        const insertIndex = $(Editor.listId)?.data[NodeEditor.processSection]?.rows?.length ?? 0
         const uuid = this.kernel.uuid()
         $(Editor.listId).insert({
-            indexPath: $indexPath(Editor.processSection, insertIndex),
+            indexPath: $indexPath(NodeEditor.processSection, insertIndex),
             value: Object.assign(actionHide, {
                 props: {
                     info: {
@@ -296,10 +353,10 @@ class Editor {
         Object.assign(listView.events, {
             ready: sender => this.ready(),
             canMoveItem: (sender, indexPath) => {
-                return indexPath.section === Editor.processSection
+                return indexPath.section === NodeEditor.processSection
             },
             swipeEnabled: (sender, indexPath) => {
-                return indexPath.section === Editor.processSection
+                return indexPath.section === NodeEditor.processSection
             }
         })
 
@@ -337,38 +394,9 @@ class Editor {
 
         return listView
     }
-
-    present(onSave) {
-        const sheet = new Sheet()
-        sheet.setView(this.getListView()).addNavBar({
-            title: this.isNew ? this.editorName : this.editorData.name,
-            popButton: { title: "Cancel" },
-            rightButtons: [
-                {
-                    title: $l10n("SAVE"),
-                    tapped: async () => {
-                        if (this.saveLock) return
-                        this.saveLock = true
-                        try {
-                            await this.save()
-                            if (typeof onSave === "function") {
-                                onSave()
-                            }
-                            $ui.success($l10n("SAVE_SUCCESS"))
-                            $delay(0.8, () => sheet.dismiss())
-                        } catch (error) {
-                            this.saveLock = false
-                            $ui.alert(error)
-                        }
-                    }
-                }
-            ]
-        })
-        sheet.init().present()
-    }
 }
 
-class SubscriptionEditor extends Editor {
+class SubscriptionEditor extends NodeEditor {
     static Source = {
         remote: 0,
         local: 1
@@ -472,7 +500,7 @@ class SubscriptionEditor extends Editor {
     }
 }
 
-class CollectionEditor extends Editor {
+class CollectionEditor extends NodeEditor {
     static defaultData = {
         name: "",
         icon: "",
@@ -532,8 +560,127 @@ class CollectionEditor extends Editor {
         } else {
             await this.kernel.api.updateCollection(this.originalName, data)
         }
-        console.log(data)
     }
 }
 
-module.exports = { Editor, SubscriptionEditor, CollectionEditor }
+class ArtifactEditor extends Editor {
+    static platforms = {
+        items: ["Surge", "QX", "Loon", "Stash", "Clash"],
+        values: ["Surge", "QX", "Loon", "Stash", "Clash"]
+    }
+    static types = {
+        items: [$l10n("SUBSCRIPTION"), $l10n("COLLECTION")],
+        values: ["subscription", "collection"]
+    }
+
+    static defaultData = {
+        name: "",
+        type: ArtifactEditor.types.values[0], // subscription, collection
+        platform: ArtifactEditor.platforms.values[0], // Clash, QX, Surge, Loon, Stash
+        source: "",
+        sync: false
+    }
+
+    editorName = $l10n("SYNC")
+
+    /**
+     *
+     * @param {AppKernel} kernel
+     * @param {Object} editorData
+     */
+    constructor(kernel, editorData, subscriptions, collections) {
+        super(kernel, editorData, ArtifactEditor.defaultData)
+        this.subscriptions = subscriptions.map(v => v.name)
+        this.collections = collections.map(v => v.name)
+        this.init()
+        this.editorData.sync = editorData?.sync ?? false
+    }
+
+    getSource() {
+        const type = this.get("type")
+        if (type === ArtifactEditor.types.values[0]) {
+            // subscription
+            return this.subscriptions
+        } else if (type === ArtifactEditor.types.values[1]) {
+            // collection
+            return this.collections
+        }
+
+        return []
+    }
+
+    set(key, value) {
+        super.set(key, value)
+
+        if (key === "type") {
+            // 更改 type 时清空 source
+            super.set("source", "")
+            $(this.setting.getId("source") + "-label").text = ""
+        }
+    }
+
+    get settingStructure() {
+        return [
+            {
+                title: "GENERAL",
+                items: [
+                    {
+                        icon: ["square.and.pencil", "#FF33CC"],
+                        title: "NAME",
+                        type: "input",
+                        key: "name",
+                        value: this.editorData.name
+                    },
+                    {
+                        icon: ["photo", "#9966FF"],
+                        title: "PLATFORM",
+                        type: "menu",
+                        key: "platform",
+                        items: ArtifactEditor.platforms.items,
+                        values: ArtifactEditor.platforms.values,
+                        value: this.editorData.platform
+                    },
+                    {
+                        icon: ["photo", "#9966FF"],
+                        title: "TYPE",
+                        type: "menu",
+                        key: "type",
+                        items: ArtifactEditor.types.items,
+                        values: ArtifactEditor.types.values,
+                        value: this.editorData.type
+                    },
+                    {
+                        icon: ["photo", "#9966FF"],
+                        title: "SOURCE",
+                        type: "menu",
+                        key: "source",
+                        items: () => this.getSource(),
+                        values: () => this.getSource(),
+                        value: this.editorData.source
+                    }
+                ]
+            }
+        ]
+    }
+
+    getListView() {
+        return this.setting.getListView()
+    }
+
+    async save() {
+        if (this.editorData.name === "") {
+            throw "Name cannot be empty"
+        }
+        if (this.editorData.source === "") {
+            throw "Source cannot be empty"
+        }
+
+        if (this.isNew) {
+            await this.kernel.api.addArtifact(data)
+        } else {
+            await this.kernel.api.updateArtifact(this.originalName, data)
+        }
+    }
+}
+
+module.exports = { Editor, SubscriptionEditor, CollectionEditor, ArtifactEditor }
