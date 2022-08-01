@@ -676,9 +676,9 @@ class ArtifactEditor extends Editor {
         }
 
         if (this.isNew) {
-            await this.kernel.api.addArtifact(data)
+            await this.kernel.api.addArtifact(this.editorData)
         } else {
-            await this.kernel.api.updateArtifact(this.originalName, data)
+            await this.kernel.api.updateArtifact(this.originalName, this.editorData)
         }
     }
 }
