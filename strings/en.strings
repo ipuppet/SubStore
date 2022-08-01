@@ -11,6 +11,8 @@
 "IMPORT_ERROR" = "Import Failed";
 
 "SUBSCRIPTION" = "Subscription";
+"SYNC" = "Sync";
+"NO_SYNC" = "Never Sync";
 "COLLECTION" = "Collection";
 "CONTAINS_SUBS" = "Contains Subs";
 "EXPIRE" = "Expire";

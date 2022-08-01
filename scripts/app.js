@@ -1,6 +1,7 @@
 const { ViewController, Sheet, Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
 const { SubStore } = require("./libs/api")
 const HomeUI = require("./ui/home")
+const SyncUI = require("./ui/sync")
 
 /**
  * @typedef {AppKernel} AppKernel
@@ -53,6 +54,7 @@ class AppKernel extends Kernel {
         this.tabBarController = new TabBarController()
         this.viewController = new ViewController()
         this.homeUI = new HomeUI(this)
+        this.syncUI = new SyncUI(this)
     }
 
     /**
@@ -227,6 +229,10 @@ class AppUI {
                 icon: "link",
                 title: $l10n("SUBSCRIPTION")
             },
+            sync: {
+                icon: "arrow.triangle.2.circlepath",
+                title: $l10n("SYNC")
+            },
             setting: {
                 icon: "gear",
                 title: $l10n("SETTING")
@@ -238,10 +244,12 @@ class AppUI {
         kernel.tabBarController
             .setPages({
                 home: homePageController.getPage(),
+                sync: kernel.syncUI.getPageController().getPage(),
                 setting: kernel.setting.getPageView()
             })
             .setCells({
                 home: buttons.home,
+                sync: buttons.sync,
                 setting: buttons.setting
             })
 

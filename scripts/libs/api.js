@@ -125,6 +125,14 @@ class SubStore {
     async preview(body, type = "sub") {
         return await this.requestWithBaseURL("/api/preview/" + type, "POST", body)
     }
+
+    async getArtifacts() {
+        return await this.requestWithBaseURL("/api/artifacts", "GET")
+    }
+
+    async deleteArtifact(name) {
+        return await this.requestWithBaseURL("/api/artifact/" + name, "DELETE")
+    }
 }
 
 module.exports = { SubStore }

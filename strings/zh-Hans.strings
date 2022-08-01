@@ -11,6 +11,8 @@
 "IMPORT_ERROR" = "导入失败";
 
 "SUBSCRIPTION" = "订阅";
+"SYNC" = "同步";
+"NO_SYNC" = "从未同步";
 "COLLECTION" = "集合";
 "CONTAINS_SUBS" = "包含订阅";
 "EXPIRE" = "过期日期";

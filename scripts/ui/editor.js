@@ -238,6 +238,10 @@ class Editor {
         // 0 为 Quick Setting Operator
         const quick = this.editorData.process[0]
         this.editorData.process = [quick, ...this.getProcess()]
+        if (this.editorData.process.length > 1) {
+            // TODO 节点操作
+            throw "Node action not supported yet"
+        }
 
         return this.editorData
     }
@@ -354,7 +358,7 @@ class Editor {
                             $delay(0.8, () => sheet.dismiss())
                         } catch (error) {
                             this.saveLock = false
-                            $ui.error(error)
+                            $ui.alert(error)
                         }
                     }
                 }

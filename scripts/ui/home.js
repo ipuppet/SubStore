@@ -25,57 +25,51 @@ class HomeUI {
 
     async init(clearUsageCache = false) {
         try {
-            const list = $(this.listId)
             if (clearUsageCache) {
                 this.kernel.api.clearCache()
             }
-            list.data = await this.getData()
+            $(this.listId).data = await this.getData()
             this.loadUsage()
         } catch (error) {
+            $ui.alert(error)
             this.kernel.print(error)
         }
     }
 
     async getData() {
-        try {
-            this.subscriptions = await this.kernel.api.getSubscriptions()
-            this.collections = await this.kernel.api.getCollections()
+        this.subscriptions = await this.kernel.api.getSubscriptions()
+        this.collections = await this.kernel.api.getCollections()
 
-            const data = [
-                {
-                    title: $l10n("SUBSCRIPTION"),
-                    rows: this.subscriptions.map(item => ({
-                        icon: item.icon ? { src: item.icon } : { symbol: "link" },
-                        name: { text: item.name },
-                        usage: {
-                            hidden: false,
-                            text: item.source === "local" ? $l10n("LOCAL_SUBSCRIPTION") : ""
-                        },
-                        expire: { hidden: false },
-                        contains: { hidden: true },
-                        info: { info: item }
-                    }))
-                },
-                {
-                    title: $l10n("COLLECTION"),
-                    rows: this.collections.map(item => ({
-                        icon: item.icon ? { src: item.icon } : { symbol: "link" },
-                        name: { text: item.name },
-                        usage: { hidden: true },
-                        expire: { hidden: true },
-                        contains: {
-                            hidden: false,
-                            text: $l10n("CONTAINS_SUBS") + ": " + item.subscriptions.join(", ")
-                        },
-                        info: { info: item }
-                    }))
-                }
-            ]
-            return data
-        } catch (error) {
-            $ui.error(error)
-            this.kernel.print(error)
-        }
+        return [
+            {
+                title: $l10n("SUBSCRIPTION"),
+                rows: this.subscriptions.map(item => ({
+                    icon: item.icon ? { src: item.icon } : { symbol: "link" },
+                    name: { text: item.name },
+                    usage: {
+                        hidden: false,
+                        text: item.source === "local" ? $l10n("LOCAL_SUBSCRIPTION") : ""
+                    },
+                    expire: { hidden: false },
+                    contains: { hidden: true },
+                    info: { info: item }
+                }))
+            },
+            {
+                title: $l10n("COLLECTION"),
+                rows: this.collections.map(item => ({
+                    icon: item.icon ? { src: item.icon } : { symbol: "link" },
+                    name: { text: item.name },
+                    usage: { hidden: true },
+                    expire: { hidden: true },
+                    contains: {
+                        hidden: false,
+                        text: $l10n("CONTAINS_SUBS") + ": " + item.subscriptions.join(", ")
+                    },
+                    info: { info: item }
+                }))
+            }
+        ]
     }
 
     loadUsage(clearCache = false) {
@@ -125,7 +119,7 @@ class HomeUI {
                 }
                 this.init()
             } catch (error) {
-                $ui.error(error)
+                $ui.alert(error)
                 this.kernel.print(error)
             }
         })
@@ -403,7 +397,7 @@ class HomeUI {
                         this.preview(info.name, preview.original, preview.processed)
                     } catch (error) {
                         this.kernel.print(error)
-                        $ui.error(error)
+                        $ui.alert(error)
                     } finally {
                         loading.end()
                     }
@@ -438,7 +432,14 @@ class HomeUI {
             },
             {
                 symbol: "arrow.clockwise",
-                tapped: () => this.init(true)
+                tapped: async () => {
+                    try {
+                        await this.init(true)
+                        $ui.success($l10n("SUCCESS"))
+                    } catch (error) {
+                        $ui.alert(error)
+                    }
+                }
             }
         ])
         pageController.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
