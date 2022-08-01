@@ -1,4 +1,4 @@
-const { UIKit, PageController, Sheet, NavigationItem } = require("../libs/easy-jsbox")
+const { UIKit, PageController, Sheet, NavigationItem, objectEqual } = require("../libs/easy-jsbox")
 const { SubscriptionEditor, CollectionEditor } = require("./editor")
 
 /**
@@ -26,7 +26,6 @@ class HomeUI {
     async init(clearUsageCache = false) {
         try {
             const list = $(this.listId)
-            list.data = []
             if (clearUsageCache) {
                 this.kernel.api.clearCache()
             }
@@ -254,8 +253,7 @@ class HomeUI {
         ]
     }
 
-    async preview(name, original, processed) {
-        const html = $file.read("assets/diff.html").string
+    preview(name, original, processed) {
         const fontSize = 16
         const fontHeight = $text.sizeThatFits({
             text: "A",
@@ -314,30 +312,35 @@ class HomeUI {
         }
 
         let data = []
-        for (let i = processed.length - 1; i >= 0; --i) {
+        const originalIdMap = {}
+        original.forEach(item => {
+            originalIdMap[item.id] = item
+        })
+        processed.forEach(item => {
             data.push({
                 info: {
                     info: {
-                        processed: processed[i],
-                        original: original[i]
+                        processed: item,
+                        original: originalIdMap[item.id]
                     }
                 },
-                processed: { text: processed[i].name },
-                original: { text: original[i].name }
+                processed: { text: item.name },
+                original: { text: originalIdMap[item.id].name }
             })
-        }
+        })
 
         const pageController = new PageController()
         pageController.setView({
             type: "list",
             props: {
-                rowHeight: rowHeight,
-                data: data.reverse(),
-                template: template
+                rowHeight,
+                data,
+                template
             },
             layout: $layout.fill,
             events: {
                 didSelect: (sender, indexPath, data) => {
+                    const html = $file.read("assets/diff.html").string
                     const info = data.info.info
                     const sheet = new Sheet()
                     sheet
@@ -380,7 +383,23 @@ class HomeUI {
                     loading.start()
                     try {
                         const info = data.info.info
-                        const preview = await this.kernel.api.preview(info)
+                        let type, fromServer
+
+                        if (info.subscriptions?.length > 0) {
+                            type = "collection"
+                            fromServer = await this.kernel.api.getCollection(info.name)
+                        } else {
+                            type = "sub"
+                            fromServer = await this.kernel.api.getSubscription(info.name)
+                        }
+
+                        if (!objectEqual(info, fromServer)) {
+                            this.kernel.print("Data is modified in other clients")
+                            // 数据在其他客户端进行了修改，重新获取
+                            await this.init()
+                        }
+
+                        const preview = await this.kernel.api.preview(fromServer, type)
                         this.preview(info.name, preview.original, preview.processed)
                     } catch (error) {
                         this.kernel.print(error)

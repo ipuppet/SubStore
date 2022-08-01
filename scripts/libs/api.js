@@ -79,6 +79,10 @@ class SubStore {
         return await this.requestWithBaseURL("/api/subs", "GET")
     }
 
+    async getSubscription(name) {
+        return await this.requestWithBaseURL("/api/sub/" + name, "GET")
+    }
+
     async addSubscription(body) {
         return await this.requestWithBaseURL("/api/subs", "POST", body)
     }
@@ -95,6 +99,17 @@ class SubStore {
         return await this.requestWithBaseURL("/api/collections", "GET")
     }
 
+    async getCollection(name) {
+        const collections = await this.getCollections()
+        for (let i = 0; i < collections.length; i++) {
+            const element = collections[i]
+            if (element.name === name) {
+                return element
+            }
+        }
+        throw `Collection '${name}' Not Found`
+    }
+
     async addCollection(body) {
         return await this.requestWithBaseURL("/api/collections", "POST", body)
     }
@@ -107,8 +122,8 @@ class SubStore {
         return await this.requestWithBaseURL("/api/collection/" + name, "DELETE")
     }
 
-    async preview(body) {
-        return await this.requestWithBaseURL("/api/preview/sub", "POST", body)
+    async preview(body, type = "sub") {
+        return await this.requestWithBaseURL("/api/preview/" + type, "POST", body)
     }
 }
 
