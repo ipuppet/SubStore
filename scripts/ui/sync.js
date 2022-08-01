@@ -35,14 +35,23 @@ class SyncUI {
 
         return [
             {
-                rows: this.artifacts.map(item => ({
-                    icon: { symbol: "link" }, // TODO platform icon
-                    name: { text: item.name },
-                    type: { text: typeL10n(item.type) },
-                    source: { text: item.source },
-                    updated: { text: item.updated ? new Date(item.updated).toLocaleString() : $l10n("NO_SYNC") },
-                    sync: { info: item, on: item.sync ?? false }
-                }))
+                rows: this.artifacts.map(item => {
+                    const path = `assets/icon/${item?.platform?.toLocaleLowerCase()}.png`
+                    let image
+                    if ($file.exists(path)) {
+                        image = $image(path, path.replace(".png", ".dark.png"))
+                    } else {
+                        image = $image("assets/icon/unknow.png", "assets/icon/unknow.dark.png")
+                    }
+                    return {
+                        icon: { image },
+                        name: { text: item.name },
+                        type: { text: typeL10n(item.type) },
+                        source: { text: item.source },
+                        updated: { text: item.updated ? new Date(item.updated).toLocaleString() : $l10n("NO_SYNC") },
+                        sync: { info: item, on: item.sync ?? false }
+                    }
+                })
             }
         ]
     }
