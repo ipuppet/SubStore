@@ -129,17 +129,39 @@ class AppKernel extends Kernel {
             animate.actionStart()
             const recoverAction = data => {
                 try {
-                    let message
                     if (typeof data === "string") {
                         data = JSON.parse(data)
                     }
+                    let message = ""
+                    const keyL10n = {
+                        subs: "单个订阅",
+                        collections: "组合订阅",
+                        artifacts: "同步配置",
+                        settings: "设置",
+                        rules: "规则"
+                    }
+                    console.log(data)
                     try {
-                        let subsList = Object.keys(data.subs)
-                        let collectionsList = Object.keys(data.collections)
-                        message = "单个订阅：\n"
-                        message += subsList.join("\n")
-                        message += "\n组合订阅：\n"
-                        message += collectionsList.join("\n")
+                        if (data.schemaVersion === "2.0") {
+                            Object.keys(data).forEach(key => {
+                                if (Array.isArray(data[key])) {
+                                    message += `\n\n${keyL10n[key]}:\n`
+                                    message += data[key].map(v => v.name).join("\n")
+                                } else if (typeof data[key] === "object") {
+                                    message += `\n\n${keyL10n[key]}:\n`
+                                    message += Object.keys(data[key])
+                                        .map(k => `${k}: ${data[key][k]}`)
+                                        .join("\n")
+                                }
+                            })
+                        } else {
+                            let subList = Object.keys(data.subs)
+                            let collectionList = Object.keys(data.collections)
+                            message = "单个订阅:\n"
+                            message += subList.join("\n")
+                            message += "\n组合订阅:\n"
+                            message += collectionList.join("\n")
+                        }
                     } catch (error) {
                         throw "无法读取到正确的信息!"
                     }
