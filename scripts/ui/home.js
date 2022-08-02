@@ -1,4 +1,4 @@
-const { UIKit, PageController, Sheet, NavigationItem, objectEqual } = require("../libs/easy-jsbox")
+const { UIKit, ViewController, PageController, Sheet, NavigationItem, objectEqual } = require("../libs/easy-jsbox")
 const { SubscriptionEditor, CollectionEditor } = require("./editor")
 
 /**
@@ -21,6 +21,8 @@ class HomeUI {
         this.listId = "subscription-list"
         this.rowHeight = 90
         this.rowEdge = 10
+
+        this.viewController = new ViewController()
     }
 
     async init(clearUsageCache = false) {
@@ -356,7 +358,7 @@ class HomeUI {
             }
         })
         pageController.navigationItem.setTitle(name).setLargeTitleDisplayMode(NavigationItem.largeTitleDisplayModeNever)
-        this.kernel.viewController.push(pageController)
+        this.viewController.push(pageController)
     }
 
     getListView() {
@@ -444,6 +446,7 @@ class HomeUI {
         ])
         pageController.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
         pageController.setView(this.getListView())
+
         return pageController
     }
 }

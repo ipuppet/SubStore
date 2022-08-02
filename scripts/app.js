@@ -1,4 +1,4 @@
-const { ViewController, Sheet, Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
+const { Sheet, Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
 const { SubStore } = require("./libs/api")
 const HomeUI = require("./ui/home")
 const SyncUI = require("./ui/sync")
@@ -52,7 +52,6 @@ class AppKernel extends Kernel {
     initComponents() {
         this.api = new SubStore(this.host)
         this.tabBarController = new TabBarController()
-        this.viewController = new ViewController()
         this.homeUI = new HomeUI(this)
         this.syncUI = new SyncUI(this)
     }
@@ -262,7 +261,6 @@ class AppUI {
         }
 
         const homePageController = kernel.homeUI.getPageController()
-        kernel.viewController.setRootPageController(homePageController)
         kernel.tabBarController
             .setPages({
                 home: homePageController.getPage(),
