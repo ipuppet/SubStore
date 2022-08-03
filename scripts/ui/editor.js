@@ -565,8 +565,8 @@ class CollectionEditor extends NodeEditor {
 
 class ArtifactEditor extends Editor {
     static platforms = {
-        items: ["Surge", "QX", "Loon", "Stash", "Clash"],
-        values: ["Surge", "QX", "Loon", "Stash", "Clash"]
+        items: ["Surge", "QX", "Loon", "Stash", "ShadowRocket", "Clash"],
+        values: ["Surge", "QX", "Loon", "Stash", "ShadowRocket", "Clash"]
     }
     static types = {
         items: [$l10n("SUBSCRIPTION"), $l10n("COLLECTION")],
