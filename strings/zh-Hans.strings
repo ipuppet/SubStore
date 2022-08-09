@@ -53,3 +53,9 @@
 
 "TYPE" = "类型";
 "PLATFORM" = "平台";
+
+"FlagOperator" = "国旗";
+"ASCENDING" = "升序";
+"DESCENDING" = "降序";
+"RANDOM" = "随机";
+"SortOperator" = "节点排序";
