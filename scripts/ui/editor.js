@@ -295,7 +295,7 @@ class NodeEditor extends Editor {
         // 0 为 Quick Setting Operator
         const quick = this.editorData.process[0]
         this.editorData.process = [quick, ...this.getProcess()]
-        if (this.editorData.process.length > 1) {
+        if (this.editorData.process.length > 1 && this.editorData.process[1].type !== "Flag Operator") {
             // TODO 节点操作
             throw "Node action not supported yet"
         }
