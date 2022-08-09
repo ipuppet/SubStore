@@ -558,6 +558,7 @@ class CollectionEditor extends NodeEditor {
 
     async save() {
         const subscriptions = this.get("subscriptions")
+        delete this.editorData["subscriptionsTips"]
         delete this.editorData["subscriptionsString"]
         const data = super.getData()
         data.subscriptions = subscriptions
