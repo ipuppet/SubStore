@@ -26,18 +26,46 @@ class Action {
         this.displayName = displayName
     }
 
-    /**
-     *
-     * @param {string} key
-     * @param {*} value
-     */
-    set(sender, key, value) {
+    #getListInfoPointer(sender) {
         let p = sender
         let max = 1000
         while (max && p !== undefined && p.id !== this.type) {
             --max
             p = p.super
         }
+        return p
+    }
+
+    setArgs(sender, args) {
+        const p = this.#getListInfoPointer(sender)
+
+        if (p) {
+            const rowInfo = p.info
+            const listInfo = $(Editor.listId).info
+            listInfo.process[rowInfo.uuid].args = args
+            $(Editor.listId).info = listInfo
+        }
+    }
+
+    getArgs(sender, _default = []) {
+        const p = this.#getListInfoPointer(sender)
+
+        if (p) {
+            const rowInfo = p.info
+            const listInfo = $(Editor.listId).info
+            return listInfo.process[rowInfo?.uuid]?.args ?? _default
+        }
+
+        return _default
+    }
+
+    /**
+     *
+     * @param {string} key
+     * @param {*} value
+     */
+    set(sender, key, value) {
+        const p = this.#getListInfoPointer(sender)
 
         if (p) {
             const rowInfo = p.info
@@ -48,20 +76,8 @@ class Action {
     }
 
     get(sender, key, _default = null) {
-        let p = sender
-        let max = 1000
-        while (max && p !== undefined && p.id !== this.type) {
-            --max
-            p = p.super
-        }
-
-        if (p) {
-            const rowInfo = p.info
-            const listInfo = $(Editor.listId).info
-            return listInfo.process[rowInfo?.uuid]?.args[key] ?? _default
-        }
-
-        return _default
+        const args = this.getArgs(sender)
+        return args[key] ?? _default
     }
 
     createSubView(views) {
