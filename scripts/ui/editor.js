@@ -525,8 +525,15 @@ class CollectionEditor extends NodeEditor {
     get settingStructure() {
         const settingStructure = super.settingStructure
         settingStructure[0].items.push({
+            icon: ["wand.and.stars", "#FF99CC"],
+            title: $l10n("SUBSCRIPTION") + " " + $l10n("TIPS"),
+            type: "script",
+            key: "subscriptionsTips",
+            value: "$ui.alert(`使用英文逗号分隔。`)"
+        })
+        settingStructure[0].items.push({
             icon: ["link", "#FF99CC"],
-            title: "subscriptions",
+            title: $l10n("SUBSCRIPTION"),
             type: "string",
             key: "subscriptionsString"
         })

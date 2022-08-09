@@ -1,5 +1,7 @@
 "SUBSTORE" = "SubStore";
 
+"TIPS" = "贴士";
+
 "CHOOSE_FILE" = "选择文件";
 "DEFAULT_FILE" = "默认文件";
 "MANUAL_INPUT" = "手动输入";
