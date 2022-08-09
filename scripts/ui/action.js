@@ -36,18 +36,23 @@ class Action {
         return p
     }
 
-    setArgs(sender, args) {
+    /**
+     *
+     * @param {string} key
+     * @param {*} value
+     */
+    set(sender, value) {
         const p = this.#getListInfoPointer(sender)
 
         if (p) {
             const rowInfo = p.info
             const listInfo = $(Editor.listId).info
-            listInfo.process[rowInfo.uuid].args = args
+            listInfo.process[rowInfo.uuid].args = value
             $(Editor.listId).info = listInfo
         }
     }
 
-    getArgs(sender, _default = []) {
+    get(sender, _default = null) {
         const p = this.#getListInfoPointer(sender)
 
         if (p) {
@@ -57,27 +62,6 @@ class Action {
         }
 
         return _default
-    }
-
-    /**
-     *
-     * @param {string} key
-     * @param {*} value
-     */
-    set(sender, key, value) {
-        const p = this.#getListInfoPointer(sender)
-
-        if (p) {
-            const rowInfo = p.info
-            const listInfo = $(Editor.listId).info
-            listInfo.process[rowInfo.uuid].args[key] = value
-            $(Editor.listId).info = listInfo
-        }
-    }
-
-    get(sender, key, _default = null) {
-        const args = this.getArgs(sender)
-        return args[key] ?? _default
     }
 
     createSubView(views) {

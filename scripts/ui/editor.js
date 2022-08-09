@@ -277,7 +277,10 @@ class NodeEditor extends Editor {
             const keys = Object.keys(row)
             for (let i = 0; i < keys.length; i++) {
                 if (row[keys[i]].hidden === false) {
-                    process.push(savedProcess[row[keys[i]].info.uuid])
+                    process.push({
+                        id: String(Math.random() * 100000000),
+                        ...savedProcess[row[keys[i]].info.uuid]
+                    })
                 }
             }
         })
