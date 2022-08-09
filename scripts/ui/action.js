@@ -36,6 +36,15 @@ class Action {
         return p
     }
 
+    ready(ready) {
+        return sender => {
+            if (this.#getListInfoPointer(sender).hidden) {
+                return
+            }
+            ready(sender)
+        }
+    }
+
     /**
      *
      * @param {string} key
