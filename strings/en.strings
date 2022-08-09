@@ -37,6 +37,7 @@
 
 "COMMON_SETTINGS" = "Common Settings";
 "RETAIN" = "Retain";
+"ADD" = "Add";
 "REMOVE" = "Remove";
 "DEFAULT" = "-";
 "ENABLE" = "ON";
@@ -52,3 +53,9 @@
 
 "TYPE" = "Type";
 "PLATFORM" = "Platform";
+
+"FlagOperator" = "Flags Options";
+"ASCENDING" = "Ascending";
+"DESCENDING" = "Descending";
+"RANDOM" = "Random";
+"SortOperator" = "Node Sort";

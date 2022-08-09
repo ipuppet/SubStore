@@ -298,8 +298,10 @@ class NodeEditor extends Editor {
         // 0 为 Quick Setting Operator
         const quick = this.editorData.process[0]
         this.editorData.process = [quick, ...this.getProcess()]
-        if (this.editorData.process.length > 1 && this.editorData.process[1].type !== "Flag Operator") {
-            // TODO 节点操作
+        if (
+            this.editorData.process.length > 1 &&
+            this.actions.map(a => a.type).indexOf(this.editorData.process[1].type) === -1
+        ) {
             throw "Node action not supported yet"
         }
 
@@ -376,9 +378,6 @@ class NodeEditor extends Editor {
                     },
                     events: {
                         tapped: sender => {
-                            // TODO 节点操作
-                            $ui.alert("Not supported yet")
-                            return
                             $ui.menu({
                                 items: this.actions.map(a => a.displayName ?? a.type),
                                 handler: (title, idx) => {

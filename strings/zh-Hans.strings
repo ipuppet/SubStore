@@ -37,6 +37,7 @@
 
 "COMMON_SETTINGS" = "通用设置";
 "RETAIN" = "保留";
+"ADD" = "添加";
 "REMOVE" = "移除";
 "DEFAULT" = "默认";
 "ENABLE" = "开启";
