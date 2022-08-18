@@ -314,7 +314,7 @@ class NodeEditor extends Editor {
 
         const Action = this.actions[idx].class
         const insertIndex = $(Editor.listId)?.data[NodeEditor.processSection]?.rows?.length ?? 0
-        const uuid = this.kernel.uuid()
+        const uuid = $text.uuid
         $(Editor.listId).insert({
             indexPath: $indexPath(NodeEditor.processSection, insertIndex),
             value: Object.assign(actionHide, {

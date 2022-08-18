@@ -1,4 +1,4 @@
-const { UIKit, ViewController, PageController, Sheet, NavigationItem, objectEqual } = require("../libs/easy-jsbox")
+const { UIKit, ViewController, Sheet, NavigationView, NavigationBar, Kernel } = require("../libs/easy-jsbox")
 const { SubscriptionEditor, CollectionEditor } = require("./editor")
 
 /**
@@ -86,7 +86,8 @@ class HomeUI {
                 }
                 const resp = await this.kernel.api.getUsage(item.url)
                 const cell = list.cell($indexPath(0, index))
-                cell.get("expire").text = $l10n("EXPIRE") + ": " + new Date(Number(resp.expire) * 1000).toLocaleDateString()
+                cell.get("expire").text =
+                    $l10n("EXPIRE") + ": " + new Date(Number(resp.expire) * 1000).toLocaleDateString()
                 const usage = this.kernel.bytesToSize(Number(resp.upload) + Number(resp.download))
                 const total = this.kernel.bytesToSize(resp.total)
                 cell.get("usage").text = $l10n("USAGE") + ": " + `${usage} / ${total}`
@@ -325,8 +326,8 @@ class HomeUI {
             })
         })
 
-        const pageController = new PageController()
-        pageController.setView({
+        const navigationView = new NavigationView()
+        navigationView.setView({
             type: "list",
             props: {
                 rowHeight,
@@ -346,7 +347,11 @@ class HomeUI {
                                 html,
                                 transparent: true,
                                 showsProgress: false,
-                                script: `diff(\`${JSON.stringify(info.original, null, 4)}\`, \`${JSON.stringify(info.processed, null, 4)}\`)`
+                                script: `diff(\`${JSON.stringify(info.original, null, 4)}\`, \`${JSON.stringify(
+                                    info.processed,
+                                    null,
+                                    4
+                                )}\`)`
                             },
                             layout: $layout.fill
                         })
@@ -357,8 +362,9 @@ class HomeUI {
                 }
             }
         })
-        pageController.navigationItem.setTitle(name).setLargeTitleDisplayMode(NavigationItem.largeTitleDisplayModeNever)
-        this.viewController.push(pageController)
+        navigationView.navigationBarTitle(name)
+        navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
+        this.viewController.push(navigationView)
     }
 
     getListView() {
@@ -388,8 +394,7 @@ class HomeUI {
                             type = "sub"
                             fromServer = await this.kernel.api.getSubscription(info.name)
                         }
-
-                        if (!objectEqual(info, fromServer)) {
+                        if (!Kernel.objectEqual(info, fromServer)) {
                             this.kernel.print("Data is modified in other clients")
                             // 数据在其他客户端进行了修改，重新获取
                             await this.init()
@@ -408,9 +413,10 @@ class HomeUI {
         }
     }
 
-    getPageController() {
-        const pageController = new PageController()
-        pageController.navigationItem.setTitle($l10n("SUBSCRIPTION")).setRightButtons([
+    getNavigationView() {
+        const navigationView = new NavigationView()
+
+        navigationView.navigationBarItems.setRightButtons([
             {
                 symbol: "plus.circle",
                 menu: {
@@ -444,10 +450,11 @@ class HomeUI {
                 }
             }
         ])
-        pageController.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
-        pageController.setView(this.getListView())
+        navigationView.navigationBarTitle($l10n("SUBSCRIPTION"))
+        navigationView.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
+        navigationView.setView(this.getListView())
 
-        return pageController
+        return navigationView
     }
 }
 

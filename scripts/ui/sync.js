@@ -1,4 +1,4 @@
-const { UIKit, PageController } = require("../libs/easy-jsbox")
+const { UIKit, NavigationView } = require("../libs/easy-jsbox")
 const { ArtifactEditor } = require("./editor")
 
 /**
@@ -258,9 +258,10 @@ class SyncUI {
         }
     }
 
-    getPageController() {
-        const pageController = new PageController()
-        pageController.navigationItem.setTitle($l10n("SYNC")).setRightButtons([
+    getNavigationView() {
+        const navigationView = new NavigationView()
+
+        navigationView.navigationBarItems.setRightButtons([
             {
                 symbol: "plus.circle",
                 tapped: () => {
@@ -279,9 +280,11 @@ class SyncUI {
                 }
             }
         ])
-        pageController.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
-        pageController.setView(this.getListView())
-        return pageController
+        navigationView.navigationBarTitle($l10n("SYNC"))
+        navigationView.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
+        navigationView.setView(this.getListView())
+
+        return navigationView
     }
 }
 

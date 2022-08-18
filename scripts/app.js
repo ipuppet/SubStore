@@ -260,11 +260,11 @@ class AppUI {
             }
         }
 
-        const homePageController = kernel.homeUI.getPageController()
+        const homeNavigationView = kernel.homeUI.getNavigationView()
         kernel.tabBarController
             .setPages({
-                home: homePageController.getPage(),
-                sync: kernel.syncUI.getPageController().getPage(),
+                home: homeNavigationView.getPage(),
+                sync: kernel.syncUI.getNavigationView().getPage(),
                 setting: kernel.setting.getPageView()
             })
             .setCells({
