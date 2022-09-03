@@ -88,8 +88,8 @@ class HomeUI {
                 const cell = list.cell($indexPath(0, index))
                 cell.get("expire").text =
                     $l10n("EXPIRE") + ": " + new Date(Number(resp.expire) * 1000).toLocaleDateString()
-                const usage = this.kernel.bytesToSize(Number(resp.upload) + Number(resp.download))
-                const total = this.kernel.bytesToSize(resp.total)
+                const usage = Kernel.bytesToSize(Number(resp.upload) + Number(resp.download))
+                const total = Kernel.bytesToSize(resp.total)
                 cell.get("usage").text = $l10n("USAGE") + ": " + `${usage} / ${total}`
             })
         } catch (error) {
