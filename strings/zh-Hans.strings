@@ -2,6 +2,9 @@
 
 "TIPS" = "贴士";
 
+"UI_SETTING" = "UI 选项";
+"HIDE_SYNC_TAB" = "隐藏同步菜单栏";
+
 "CHOOSE_FILE" = "选择文件";
 "DEFAULT_FILE" = "默认文件";
 "MANUAL_INPUT" = "手动输入";

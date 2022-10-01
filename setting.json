@@ -1,5 +1,30 @@
 [
     {
+        "items": [
+            {
+                "title": "UI_SETTING",
+                "type": "child",
+                "key": "ui",
+                "children": [
+                    {
+                        "items": [
+                            {
+                                "icon": [
+                                    "arrow.triangle.2.circlepath",
+                                    "#FF9900"
+                                ],
+                                "title": "HIDE_SYNC_TAB",
+                                "type": "switch",
+                                "key": "ui.sync",
+                                "value": false
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "title": "ADVANCED",
         "items": [
             {

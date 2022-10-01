@@ -35,7 +35,9 @@ class SubStore {
                 method,
                 body
             })
-            if (resp?.response?.statusCode >= 400) {
+            if (resp.error) {
+                throw resp.error
+            } else if (resp?.response?.statusCode >= 400) {
                 throw new Error("http error: [" + resp.response.statusCode + "] " + resp.data.message)
             }
             return resp

@@ -2,6 +2,9 @@
 
 "TIPS" = "Tips";
 
+"UI_SETTING" = "UI Setting";
+"HIDE_SYNC_TAB" = "Hide Sync Tab";
+
 "CHOOSE_FILE" = "Choose File";
 "DEFAULT_FILE" = "Default File";
 "MANUAL_INPUT" = "Input";

@@ -32,6 +32,7 @@ class HomeUI {
             }
             $(this.listId).data = await this.getData()
             this.loadUsage()
+            this.kernel.tabBarController.initBackground()
         } catch (error) {
             $ui.alert(error)
             this.kernel.print(error)

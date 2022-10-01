@@ -236,18 +236,28 @@ class AppUI {
             }
         }
 
-        const homeNavigationView = kernel.homeUI.getNavigationView()
-        kernel.tabBarController
-            .setPages({
-                home: homeNavigationView.getPage(),
-                sync: kernel.syncUI.getNavigationView().getPage(),
-                setting: kernel.setting.getPageView()
-            })
-            .setCells({
-                home: buttons.home,
-                sync: buttons.sync,
-                setting: buttons.setting
-            })
+        const pages = {
+            home: kernel.homeUI.getNavigationView().getPage(),
+            sync: kernel.syncUI.getNavigationView().getPage(),
+            setting: kernel.setting.getPageView()
+        }
+        const cells = {
+            home: buttons.home,
+            sync: buttons.sync,
+            setting: buttons.setting
+        }
+
+        kernel.setting.setEvent("onSet", key => {
+            if (key === "ui.sync") {
+                $delay(0.3, () => $addin.restart())
+            }
+        })
+        if (kernel.setting.get("ui.sync")) {
+            delete pages.sync
+            delete cells.sync
+        }
+
+        kernel.tabBarController.setPages(pages).setCells(cells)
 
         kernel.UIRender(kernel.tabBarController.generateView().definition)
     }
