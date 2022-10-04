@@ -239,7 +239,7 @@ class AppUI {
         const pages = {
             home: kernel.homeUI.getNavigationView().getPage(),
             sync: kernel.syncUI.getNavigationView().getPage(),
-            setting: kernel.setting.getPageView()
+            setting: kernel.setting.getPage()
         }
         const cells = {
             home: buttons.home,
