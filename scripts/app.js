@@ -1,4 +1,4 @@
-const { Sheet, Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
+const { Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
 const { SubStore } = require("./libs/api")
 const HomeUI = require("./ui/home")
 const SyncUI = require("./ui/sync")

@@ -1,59 +1,24 @@
-class SubStore {
-    constructor(baseURL = "") {
-        this.baseURL = baseURL
+const { Request } = require("./easy-jsbox")
+
+class SubStore extends Request {
+    constructor(baseUrl = "") {
+        super()
+        this.baseUrl = baseUrl
+        this.clearCache()
     }
 
-    static get cache() {
-        return $cache.get("substore.cache") ?? {}
-    }
-
-    getCache(key, _default = null) {
-        const cache = SubStore.cache
-        return cache[key] ?? _default
-    }
-
-    setCache(key, data) {
-        if (!data || typeof data !== "string") {
-            return
-        }
-        const cache = SubStore.cache
-        cache[key] = data
-        $cache.set("substore.cache", cache)
-    }
-
-    clearCache() {
-        $cache.remove("substore.cache")
-    }
-
-    async #request(url, method, body = {}) {
-        try {
-            const resp = await $http.request({
-                header: {
-                    "User-Agent": "Quantumult%20X/1.0.30 (iPhone14,2; iOS 15.6)"
-                },
-                url,
-                method,
-                body
-            })
-            if (resp.error) {
-                throw resp.error
-            } else if (resp?.response?.statusCode >= 400) {
-                throw new Error("http error: [" + resp.response.statusCode + "] " + resp.data.message)
-            }
-            return resp
-        } catch (error) {
-            if (error.code) {
-                throw new Error("network error: [" + error.code + "] " + error.localizedDescription)
-            } else {
-                throw error
-            }
-        }
+    async request(url, method, body = {}) {
+        return await super.request(url, method, body, {
+            "User-Agent": "Quantumult%20X/1.0.30 (iPhone14,2; iOS 15.6)"
+        })
     }
 
     async requestWithBaseURL(path, method, body = {}) {
-        const resp = await this.#request(this.baseURL + path, method, body)
+        const url = this.baseUrl + path
+        const resp = await this.request(url, method, body)
         if (resp?.data?.status !== "success") {
-            throw new Error(`${method} ${this.baseURL + path} [${resp.response.statusCode}] ${resp.data}`)
+            this.removeCache(this.getCacheKey(url))
+            throw new Error(`${method} ${url} [${resp.response.statusCode}] ${resp.data}`)
         }
         return resp.data.data
     }
@@ -63,7 +28,7 @@ class SubStore {
         if (cache) {
             return JSON.parse(cache)
         }
-        const resp = await this.#request(url, "HEAD")
+        const resp = await this.request(url, Request.method.head)
         const infoObj = {}
         const info = resp?.response?.headers["subscription-userinfo"]
         info?.split(";")?.forEach(item => {
@@ -78,27 +43,27 @@ class SubStore {
     }
 
     async getSubscriptions() {
-        return await this.requestWithBaseURL("/api/subs", "GET")
+        return await this.requestWithBaseURL("/api/subs", Request.method.get)
     }
 
     async getSubscription(name) {
-        return await this.requestWithBaseURL("/api/sub/" + name, "GET")
+        return await this.requestWithBaseURL("/api/sub/" + name, Request.method.get)
     }
 
     async addSubscription(body) {
-        return await this.requestWithBaseURL("/api/subs", "POST", body)
+        return await this.requestWithBaseURL("/api/subs", Request.method.post, body)
     }
 
     async updateSubscription(name, body) {
-        return await this.requestWithBaseURL("/api/sub/" + name, "PATCH", body)
+        return await this.requestWithBaseURL("/api/sub/" + name, Request.method.patch, body)
     }
 
     async deleteSubscription(name) {
-        return await this.requestWithBaseURL("/api/sub/" + name, "DELETE")
+        return await this.requestWithBaseURL("/api/sub/" + name, Request.method.delete)
     }
 
     async getCollections() {
-        return await this.requestWithBaseURL("/api/collections", "GET")
+        return await this.requestWithBaseURL("/api/collections", Request.method.get)
     }
 
     async getCollection(name) {
@@ -113,35 +78,35 @@ class SubStore {
     }
 
     async addCollection(body) {
-        return await this.requestWithBaseURL("/api/collections", "POST", body)
+        return await this.requestWithBaseURL("/api/collections", Request.method.post, body)
     }
 
     async updateCollection(name, body) {
-        return await this.requestWithBaseURL("/api/collection/" + name, "PATCH", body)
+        return await this.requestWithBaseURL("/api/collection/" + name, Request.method.patch, body)
     }
 
     async deleteCollection(name) {
-        return await this.requestWithBaseURL("/api/collection/" + name, "DELETE")
+        return await this.requestWithBaseURL("/api/collection/" + name, Request.method.delete)
     }
 
     async preview(body, type = "sub") {
-        return await this.requestWithBaseURL("/api/preview/" + type, "POST", body)
+        return await this.requestWithBaseURL("/api/preview/" + type, Request.method.post, body)
     }
 
     async getArtifacts() {
-        return await this.requestWithBaseURL("/api/artifacts", "GET")
+        return await this.requestWithBaseURL("/api/artifacts", Request.method.get)
     }
 
     async deleteArtifact(name) {
-        return await this.requestWithBaseURL("/api/artifact/" + name, "DELETE")
+        return await this.requestWithBaseURL("/api/artifact/" + name, Request.method.delete)
     }
 
     async addArtifact(body) {
-        return await this.requestWithBaseURL("/api/artifacts", "POST", body)
+        return await this.requestWithBaseURL("/api/artifacts", Request.method.post, body)
     }
 
     async updateArtifact(name, body) {
-        return await this.requestWithBaseURL("/api/artifact/" + name, "PATCH", body)
+        return await this.requestWithBaseURL("/api/artifact/" + name, Request.method.patch, body)
     }
 }
 
