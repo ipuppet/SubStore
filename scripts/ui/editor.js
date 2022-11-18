@@ -444,12 +444,6 @@ class SubscriptionEditor extends NodeEditor {
                 $(this.setting.getId("url&content")).views[0].views[1].text = $l10n("CONTENT")
             }
             this.editorData["source"] = SubscriptionEditor.SourceValue(value)
-        } else if (key === "url&content") {
-            if (this.setting.get("source") === SubscriptionEditor.Source.remote) {
-                this.editorData["url"] = value
-            } else {
-                this.editorData["content"] = value
-            }
         } else {
             super.set(key, value)
         }
