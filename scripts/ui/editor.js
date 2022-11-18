@@ -459,13 +459,6 @@ class SubscriptionEditor extends NodeEditor {
         if (key === "source") {
             return SubscriptionEditor.Source[this.editorData[key] ?? 0]
         }
-        if (key === "url&content") {
-            if (this.setting.get("source") === SubscriptionEditor.Source.remote) {
-                return this.editorData["url"]
-            } else {
-                return this.editorData["content"]
-            }
-        }
         return super.get(key, _default)
     }
 
@@ -491,9 +484,14 @@ class SubscriptionEditor extends NodeEditor {
     }
 
     async save() {
+        if (this.setting.get("source") === SubscriptionEditor.Source.remote) {
+            this.editorData["url"] = this.editorData["url&content"]
+        } else {
+            this.editorData["content"] = this.editorData["url&content"]
+        }
         delete this.editorData["url&content"]
-        const data = super.getData()
 
+        const data = super.getData()
         if (this.isNew) {
             await this.kernel.api.addSubscription(data)
         } else {
