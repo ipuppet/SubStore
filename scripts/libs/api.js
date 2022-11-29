@@ -4,7 +4,6 @@ class SubStore extends Request {
     constructor(baseUrl = "") {
         super()
         this.baseUrl = baseUrl
-        this.clearCache()
     }
 
     async request(url, method, body = {}) {
@@ -23,10 +22,17 @@ class SubStore extends Request {
         return resp.data.data
     }
 
+    clearCache() {
+        super.clearCache()
+        $cache.remove("api.usage")
+    }
+
     async getUsage(url) {
-        const cache = this.getCache(url)
-        if (cache) {
-            return JSON.parse(cache)
+        const cache = $cache.get("api.usage") ?? {}
+        const key = $text.MD5(url)
+        if (cache[key] && Date.now() - cache[key].date < 1000 * 60 * 10) {
+            console.log("get data from cache: " + url)
+            return cache[key].info
         }
         const resp = await this.request(url, Request.method.head)
         const infoObj = {}
@@ -38,7 +44,8 @@ class SubStore extends Request {
                 infoObj[kv[0]] = kv[1]
             }
         })
-        this.setCache(url, JSON.stringify(infoObj))
+        cache[key] = { info: infoObj, date: Date.now() }
+        $cache.set("api.usage", cache)
         return infoObj
     }
 

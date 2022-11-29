@@ -45,10 +45,12 @@ class Editor {
     set(key, value) {
         // 值未改变则直接返回
         if (value === this.get(key)) {
-            return
+            return false
         }
 
         this.editorData[key] = value
+
+        return true
     }
 
     get(key, _default = null) {
@@ -173,7 +175,7 @@ class NodeEditor extends Editor {
             this.editorData.process[this.quickSettingIndex].args[qkey] = value
         }
 
-        super.set(key, value)
+        return super.set(key, value)
     }
 
     get(key, _default = null) {
@@ -447,6 +449,8 @@ class SubscriptionEditor extends NodeEditor {
         } else {
             super.set(key, value)
         }
+
+        return true
     }
 
     get(key, _default = null) {
@@ -540,6 +544,8 @@ class CollectionEditor extends NodeEditor {
         } else {
             super.set(key, value)
         }
+
+        return true
     }
 
     get(key, _default = null) {
@@ -616,9 +622,11 @@ class ArtifactEditor extends Editor {
 
         if (key === "type") {
             // 更改 type 时清空 source
-            super.set("source", "")
             $(this.setting.getId("source") + "-label").text = ""
+            super.set("source", "")
         }
+
+        return true
     }
 
     get settingStructure() {
