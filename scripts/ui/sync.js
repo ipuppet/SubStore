@@ -1,4 +1,4 @@
-const { UIKit, NavigationView } = require("../libs/easy-jsbox")
+const { UIKit, NavigationView, NavigationBar } = require("../libs/easy-jsbox")
 const { ArtifactEditor } = require("./editor")
 
 /**
@@ -283,6 +283,9 @@ class SyncUI {
         navigationView.navigationBarTitle($l10n("SYNC"))
         navigationView.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
         navigationView.setView(this.getListView())
+        if ($app.env === $env.today) {
+            navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
+        }
 
         return navigationView
     }

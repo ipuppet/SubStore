@@ -454,6 +454,9 @@ class HomeUI {
         navigationView.navigationBarTitle($l10n("SUBSCRIPTION"))
         navigationView.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
         navigationView.setView(this.getListView())
+        if ($app.env === $env.today) {
+            navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
+        }
 
         return navigationView
     }

@@ -1,4 +1,4 @@
-const { Kernel, TabBarController, Setting } = require("./libs/easy-jsbox")
+const { Kernel, TabBarController, NavigationBar, Setting } = require("./libs/easy-jsbox")
 const { SubStore } = require("./libs/api")
 const HomeUI = require("./ui/home")
 const SyncUI = require("./ui/sync")
@@ -242,10 +242,15 @@ class AppUI {
             }
         }
 
+        const settingNavigationView = kernel.setting.getNavigationView()
+        if ($app.env === $env.today) {
+            settingNavigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
+        }
+
         const pages = {
             home: kernel.homeUI.getNavigationView().getPage(),
             sync: kernel.syncUI.getNavigationView().getPage(),
-            setting: kernel.setting.getPage()
+            setting: settingNavigationView.getPage()
         }
         const cells = {
             home: buttons.home,
@@ -287,7 +292,7 @@ class AppUI {
 
 module.exports = {
     run: () => {
-        if ($app.env === $env.app || $app.env === $env.action) {
+        if ($app.env === $env.app || $app.env === $env.today) {
             AppUI.renderMainUI()
         } else {
             AppUI.renderUnsupported()
