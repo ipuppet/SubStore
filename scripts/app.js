@@ -14,6 +14,7 @@ class AppKernel extends Kernel {
         this.initSettingMethods()
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
+        this.backupPathICloud = "drive://SubStore/.backup.json.icloud"
         if (!$file.exists("drive://SubStore/")) {
             $file.mkdir("drive://SubStore/")
         }
@@ -115,7 +116,6 @@ class AppKernel extends Kernel {
                         settings: "设置",
                         rules: "规则"
                     }
-                    console.log(data)
                     try {
                         if (data.schemaVersion === "2.0") {
                             Object.keys(data).forEach(key => {
@@ -187,7 +187,7 @@ class AppKernel extends Kernel {
             }
             $ui.menu({
                 items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("MANUAL_INPUT")],
-                handler: (title, idx) => {
+                handler: async (title, idx) => {
                     if (idx === 0) {
                         $drive.open({
                             handler: data => {
@@ -195,8 +195,14 @@ class AppKernel extends Kernel {
                             }
                         })
                     } else if (idx === 1) {
-                        if ($file.exists(this.backupPath)) {
-                            recoverAction($file.read(this.backupPath).string)
+                        if ($file.exists(this.backupPath) || $file.exists(this.backupPathICloud)) {
+                            let data
+                            if ($file.exists(this.backupPathICloud)) {
+                                data = await $file.download(this.backupPathICloud).string
+                            } else {
+                                data = $file.read(this.backupPath).string
+                            }
+                            recoverAction(data)
                         } else {
                             $ui.alert("FILE_NOT_FOUND")
                         }
