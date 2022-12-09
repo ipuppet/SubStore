@@ -261,6 +261,10 @@ class SyncUI {
     getNavigationView() {
         const navigationView = new NavigationView()
 
+        if ($app.env !== $env.app) {
+            navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
+        }
+
         navigationView.navigationBarItems.setRightButtons([
             {
                 symbol: "plus.circle",
@@ -283,9 +287,6 @@ class SyncUI {
         navigationView.navigationBarTitle($l10n("SYNC"))
         navigationView.navigationController.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
         navigationView.setView(this.getListView())
-        if ($app.env === $env.today) {
-            navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
-        }
 
         return navigationView
     }

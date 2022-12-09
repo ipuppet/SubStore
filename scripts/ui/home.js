@@ -417,6 +417,16 @@ class HomeUI {
     getNavigationView() {
         const navigationView = new NavigationView()
 
+        if ($app.env !== $env.app) {
+            navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
+            navigationView.navigationBarItems.setLeftButtons([
+                {
+                    symbol: "xmark",
+                    tapped: () => $app.close()
+                }
+            ])
+        }
+
         navigationView.navigationBarItems.setRightButtons([
             {
                 symbol: "plus.circle",
@@ -454,9 +464,6 @@ class HomeUI {
         navigationView.navigationBarTitle($l10n("SUBSCRIPTION"))
         navigationView.navigationBar.setBackgroundColor(UIKit.primaryViewBackgroundColor)
         navigationView.setView(this.getListView())
-        if ($app.env === $env.today) {
-            navigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
-        }
 
         return navigationView
     }

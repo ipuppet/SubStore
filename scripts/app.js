@@ -243,7 +243,7 @@ class AppUI {
         }
 
         const settingNavigationView = kernel.setting.getNavigationView()
-        if ($app.env === $env.today) {
+        if ($app.env !== $env.app) {
             settingNavigationView.navigationBar.setLargeTitleDisplayMode(NavigationBar.largeTitleDisplayModeNever)
         }
 
