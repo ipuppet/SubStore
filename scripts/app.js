@@ -53,7 +53,7 @@ class AppKernel extends Kernel {
      */
     initSettingMethods() {
         this.setting.method.export = animate => {
-            animate.actionStart()
+            animate.start()
             $ui.menu({
                 items: [$l10n("CHOOSE_FILE"), $l10n("DEFAULT_FILE"), $l10n("COPY_TO_CLIPBOARD")],
                 handler: (title, idx) => {
@@ -62,7 +62,7 @@ class AppKernel extends Kernel {
                         handler: resp => {
                             if (resp.error) {
                                 $ui.alert($l10n("EXPORT_ERROR"))
-                                animate.actionCancel()
+                                animate.cancel()
                             } else {
                                 const data = JSON.parse(resp.data)
                                 switch (idx) {
@@ -72,9 +72,9 @@ class AppKernel extends Kernel {
                                             name: this.backupPath.slice(this.backupPath.lastIndexOf("/") + 1),
                                             handler: success => {
                                                 if (success) {
-                                                    animate.actionDone()
+                                                    animate.done()
                                                 } else {
-                                                    animate.actionCancel()
+                                                    animate.cancel()
                                                 }
                                             }
                                         })
@@ -84,11 +84,11 @@ class AppKernel extends Kernel {
                                             data: $data({ string: data }),
                                             path: this.backupPath
                                         })
-                                        animate.actionDone()
+                                        animate.done()
                                         break
                                     case 2:
                                         $clipboard.text = data
-                                        animate.actionDone()
+                                        animate.done()
                                         break
                                 }
                             }
@@ -96,13 +96,13 @@ class AppKernel extends Kernel {
                     })
                 },
                 finished: cancelled => {
-                    if (cancelled) animate.actionCancel()
+                    if (cancelled) animate.cancel()
                 }
             })
         }
 
         this.setting.method.import = animate => {
-            animate.actionStart()
+            animate.start()
             const recoverAction = data => {
                 try {
                     if (typeof data === "string") {
@@ -158,10 +158,10 @@ class AppKernel extends Kernel {
                                                     title: $l10n("IMPORT_ERROR"),
                                                     message: resp.error.localizedDescription
                                                 })
-                                                animate.actionCancel()
+                                                animate.cancel()
                                             } else {
                                                 // 完成动画
-                                                animate.actionDone()
+                                                animate.done()
                                                 // 重新启动
                                                 setTimeout(() => {
                                                     $addin.restart()
@@ -174,14 +174,14 @@ class AppKernel extends Kernel {
                             {
                                 title: $l10n("CANCEL"),
                                 handler: () => {
-                                    animate.actionCancel()
+                                    animate.cancel()
                                 }
                             }
                         ]
                     })
                 } catch (error) {
                     $ui.alert(error)
-                    animate.actionCancel()
+                    animate.cancel()
                     return
                 }
             }
@@ -217,7 +217,7 @@ class AppKernel extends Kernel {
                     }
                 },
                 finished: cancelled => {
-                    if (cancelled) animate.actionCancel()
+                    if (cancelled) animate.cancel()
                 }
             })
         }
