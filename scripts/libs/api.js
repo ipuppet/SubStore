@@ -14,12 +14,17 @@ class SubStore extends Request {
 
     async requestWithBaseURL(path, method, body = {}) {
         const url = this.baseUrl + path
-        const resp = await this.request(url, method, body)
-        if (resp?.data?.status !== "success") {
-            this.removeCache(this.getCacheKey(url))
-            throw new Error(`${method} ${url} [${resp.response.statusCode}] ${resp.data}`)
+        try {
+            const resp = await this.request(url, method, body)
+            if (resp?.data?.status !== "success") {
+                this.removeCache(this.getCacheKey(url))
+                throw new Error(`${method} ${url} [${resp.response.statusCode}] ${resp.data}`)
+            }
+            return resp.data.data
+        } catch (error) {
+            console.error("error url: " + url)
+            throw error
         }
-        return resp.data.data
     }
 
     clearCache() {
