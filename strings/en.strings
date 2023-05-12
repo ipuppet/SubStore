@@ -31,6 +31,7 @@
 "SAVE_SUCCESS" = "Save Success";
 "GENERAL" = "General";
 "NAME" = "Name";
+"DISPLAY_NAME" = "Display Name";
 "ICON" = "Icon";
 "SOURCE" = "Source";
 "REMOTE" = "Remote";

@@ -237,6 +237,13 @@ class NodeEditor extends Editor {
                         value: this.editorData.name
                     },
                     {
+                        icon: ["square.and.pencil", "#FF33CC"],
+                        title: "DISPLAY_NAME",
+                        type: "input",
+                        key: "display-name",
+                        value: this.editorData.name
+                    },
+                    {
                         icon: ["photo", "#9966FF"],
                         title: "ICON",
                         type: "input",
@@ -639,6 +646,13 @@ class ArtifactEditor extends Editor {
                         title: "NAME",
                         type: "input",
                         key: "name",
+                        value: this.editorData.name
+                    },
+                    {
+                        icon: ["square.and.pencil", "#FF33CC"],
+                        title: "DISPLAY_NAME",
+                        type: "input",
+                        key: "displayName",
                         value: this.editorData.name
                     },
                     {

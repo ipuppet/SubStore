@@ -32,6 +32,12 @@ class SyncUI {
         this.artifacts = await this.kernel.api.getArtifacts()
 
         const typeL10n = t => (t === "subscription" ? $l10n("SUBSCRIPTION") : $l10n("COLLECTION"))
+        const getName = item => {
+            if (item["displayName"] && item["displayName"] !== "") {
+                return item["displayName"]
+            }
+            return item.name
+        }
 
         return [
             {
@@ -45,7 +51,7 @@ class SyncUI {
                     }
                     return {
                         icon: { image },
-                        name: { text: item.name },
+                        name: { text: getName(item) },
                         type: { text: typeL10n(item.type) },
                         source: { text: item.source },
                         updated: { text: item.updated ? new Date(item.updated).toLocaleString() : $l10n("NO_SYNC") },
@@ -66,6 +72,16 @@ class SyncUI {
             // 保存完成后刷新页面
             this.init()
         })
+    }
+
+    async syncAllArtifacts() {
+        await this.kernel.api.syncAllArtifacts()
+        this.init()
+    }
+
+    async syncArtifact(name) {
+        await this.kernel.api.syncArtifact(name)
+        this.init()
     }
 
     deleteArtifact(name) {
@@ -237,6 +253,14 @@ class SyncUI {
                     const info = sender.object(indexPath).sync.info
                     this.newArtifactEditor(info)
                 }
+            },
+            {
+                title: $l10n("SYNC"),
+                color: $color("#fcba03"),
+                handler: (sender, indexPath) => {
+                    const info = sender.object(indexPath).sync.info
+                    this.syncArtifact(info.name)
+                }
             }
         ]
     }
@@ -247,7 +271,7 @@ class SyncUI {
             props: {
                 id: this.listId,
                 rowHeight: this.rowHeight,
-                data: this.subscriptions,
+                data: [],
                 template: this.listTemplate,
                 actions: this.listActions
             },
@@ -277,6 +301,17 @@ class SyncUI {
                 tapped: async () => {
                     try {
                         await this.init()
+                        $ui.success($l10n("SUCCESS"))
+                    } catch (error) {
+                        $ui.alert(error)
+                    }
+                }
+            },
+            {
+                symbol: "icloud.and.arrow.up",
+                tapped: async () => {
+                    try {
+                        await this.syncAllArtifacts()
                         $ui.success($l10n("SUCCESS"))
                     } catch (error) {
                         $ui.alert(error)

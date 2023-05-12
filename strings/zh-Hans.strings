@@ -31,6 +31,7 @@
 "SAVE_SUCCESS" = "保存成功";
 "GENERAL" = "通用";
 "NAME" = "名称";
+"DISPLAY_NAME" = "显示名称";
 "ICON" = "图标";
 "SOURCE" = "来源";
 "REMOTE" = "远程";

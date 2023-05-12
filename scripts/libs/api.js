@@ -115,6 +115,14 @@ class SubStore extends Request {
     async updateArtifact(name, body) {
         return await this.requestWithBaseURL("/api/artifact/" + name, Request.method.patch, body)
     }
+
+    async syncAllArtifacts() {
+        return await this.requestWithBaseURL("/api/sync/artifacts", Request.method.get)
+    }
+
+    async syncArtifact(name) {
+        return await this.requestWithBaseURL("/api/sync/artifact/" + name, Request.method.get)
+    }
 }
 
 module.exports = { SubStore }

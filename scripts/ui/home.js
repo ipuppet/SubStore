@@ -43,12 +43,19 @@ class HomeUI {
         this.subscriptions = await this.kernel.api.getSubscriptions()
         this.collections = await this.kernel.api.getCollections()
 
+        const getName = item => {
+            if (item["display-name"] && item["display-name"] !== "") {
+                return item["display-name"]
+            }
+            return item.name
+        }
+
         return [
             {
                 title: $l10n("SUBSCRIPTION"),
                 rows: this.subscriptions.map(item => ({
                     icon: item.icon ? { src: item.icon } : { symbol: "link" },
-                    name: { text: item.name },
+                    name: { text: getName(item) },
                     usage: {
                         hidden: false,
                         text: item.source === "local" ? $l10n("LOCAL_SUBSCRIPTION") : ""
@@ -62,7 +69,7 @@ class HomeUI {
                 title: $l10n("COLLECTION"),
                 rows: this.collections.map(item => ({
                     icon: item.icon ? { src: item.icon } : { symbol: "link" },
-                    name: { text: item.name },
+                    name: { text: getName(item) },
                     usage: { hidden: true },
                     expire: { hidden: true },
                     contains: {
