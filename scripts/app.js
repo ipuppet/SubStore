@@ -196,12 +196,10 @@ class AppKernel extends Kernel {
                         })
                     } else if (idx === 1) {
                         if ($file.exists(this.backupPath) || $file.exists(this.backupPathICloud)) {
-                            let data
                             if ($file.exists(this.backupPathICloud)) {
-                                data = await $file.download(this.backupPathICloud).string
-                            } else {
-                                data = $file.read(this.backupPath).string
+                                await $file.download(this.backupPathICloud)
                             }
+                            const data = $file.read(this.backupPath).string
                             recoverAction(data)
                         } else {
                             $ui.alert("FILE_NOT_FOUND")
