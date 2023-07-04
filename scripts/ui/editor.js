@@ -531,7 +531,7 @@ class CollectionEditor extends NodeEditor {
         const getData = () => {
             const subscriptions = this.get("subscriptions", [])
             return this.kernel.homeUI.subscriptions.map(i => {
-                let name = i["display-name"].trim()
+                let name = i["display-name"]?.trim()
                 if (!name || name === "") {
                     name = i.name
                 }
