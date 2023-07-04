@@ -523,52 +523,104 @@ class CollectionEditor extends NodeEditor {
      */
     constructor(kernel, editorData) {
         super(kernel, editorData, CollectionEditor.defaultData)
-        this.editorData["subscriptionsString"] = this.editorData.subscriptions.join(",") ?? ""
         this.init()
+    }
+
+    subscriptionSelectSheet() {
+        const symbol = { selected: "checkmark.circle.fill", unselected: "circle" }
+        const getData = () => {
+            const subscriptions = this.get("subscriptions", [])
+            return this.kernel.homeUI.subscriptions.map(i => {
+                let name = i["display-name"].trim()
+                if (!name || name === "") {
+                    name = i.name
+                }
+                return {
+                    name: { text: name, info: i },
+                    checkmark: {
+                        symbol: subscriptions.includes(i.name) ? symbol.selected : symbol.unselected
+                    }
+                }
+            })
+        }
+        const listView = {
+            type: "list",
+            props: {
+                id: "subscriptionSelectSheetList",
+                data: getData(),
+                template: {
+                    views: [
+                        {
+                            type: "label",
+                            props: { id: "name" },
+                            layout: (make, view) => {
+                                make.height.right.equalTo(view.super)
+                                make.left.inset(55)
+                            }
+                        },
+                        {
+                            type: "image",
+                            props: {
+                                id: "checkmark",
+                                contentMode: $contentMode.scaleAspectFit
+                            },
+                            layout: (make, view) => {
+                                make.centerY.equalTo(view.super)
+                                make.left.inset(15)
+                                make.size.equalTo($size(25, 25))
+                            }
+                        }
+                    ]
+                }
+            },
+            events: {
+                didSelect: (sender, indexPath, data) => {
+                    const name = data.name.info.name // info.name 为该订阅 id
+                    let subscriptions = this.get("subscriptions", [])
+                    const index = subscriptions.indexOf(name)
+                    if (index >= 0) {
+                        subscriptions.splice(index, 1)
+                    } else {
+                        subscriptions.push(name)
+                    }
+                    this.set("subscriptions", subscriptions)
+                    $("subscriptionSelectSheetList").data = getData()
+                }
+            },
+            layout: $layout.fill
+        }
+        const sheet = new Sheet()
+        sheet
+            .setView({
+                type: "view",
+                views: [listView],
+                layout: $layout.fill
+            })
+            .addNavBar({
+                title: $l10n("SUBSCRIPTION"),
+                popButton: { title: $l10n("CLOSE") }
+            })
+        sheet.init().present()
     }
 
     get settingStructure() {
         const settingStructure = super.settingStructure
         settingStructure[0].items.push({
-            icon: ["wand.and.stars", "#FF99CC"],
-            title: $l10n("SUBSCRIPTION") + " " + $l10n("TIPS"),
-            type: "script",
-            key: "subscriptionsTips",
-            value: "$ui.alert(`使用英文逗号分隔。`)"
-        })
-        settingStructure[0].items.push({
             icon: ["link", "#FF99CC"],
             title: $l10n("SUBSCRIPTION"),
-            type: "string",
-            key: "subscriptionsString"
+            type: "script",
+            key: "subscriptionSelect",
+            value: () => this.subscriptionSelectSheet()
+        })
+        settingStructure[0].items.push({
+            key: "subscriptions"
         })
         return settingStructure
     }
 
-    set(key, value) {
-        if (key === "subscriptions") {
-            this.editorData["subscriptionsString"] = value.subscriptions.join(",")
-        } else {
-            super.set(key, value)
-        }
-
-        return true
-    }
-
-    get(key, _default = null) {
-        if (key === "subscriptions") {
-            return this.editorData["subscriptionsString"]?.split(",").map(item => item.trim())
-        }
-
-        return super.get(key, _default)
-    }
-
     async save() {
-        const subscriptions = this.get("subscriptions")
-        delete this.editorData["subscriptionsTips"]
-        delete this.editorData["subscriptionsString"]
+        delete this.editorData["subscriptionSelect"]
         const data = super.getData()
-        data.subscriptions = subscriptions
 
         if (this.isNew) {
             await this.kernel.api.addCollection(data)

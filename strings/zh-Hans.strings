@@ -1,6 +1,7 @@
 "SUBSTORE" = "SubStore";
 
 "TIPS" = "贴士";
+"CLOSE" = "关闭";
 
 "UI_SETTING" = "UI 选项";
 "HIDE_SYNC_TAB" = "隐藏同步菜单栏";

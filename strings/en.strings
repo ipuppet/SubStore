@@ -1,6 +1,7 @@
 "SUBSTORE" = "SubStore";
 
 "TIPS" = "Tips";
+"CLOSE" = "Close";
 
 "UI_SETTING" = "UI Setting";
 "HIDE_SYNC_TAB" = "Hide Sync Tab";
