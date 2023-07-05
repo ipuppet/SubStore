@@ -64,3 +64,4 @@
 "DESCENDING" = "Descending";
 "RANDOM" = "Random";
 "SortOperator" = "Node Sort";
+"TypeFilter" = "Node Type Filter";

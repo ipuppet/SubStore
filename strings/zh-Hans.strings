@@ -64,3 +64,4 @@
 "DESCENDING" = "降序";
 "RANDOM" = "随机";
 "SortOperator" = "节点排序";
+"TypeFilter" = "节点类型过滤";

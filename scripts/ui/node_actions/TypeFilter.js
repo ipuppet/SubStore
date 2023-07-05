@@ -2,7 +2,7 @@ const { Action, MultiSelectionForm } = require("../action")
 
 class TypeFilter extends Action {
     static type = "Type Filter"
-    static displayName = "TypeFilter"
+    static displayName = $l10n("TypeFilter")
 
     static types = ["vmess", "ssr", "ss", "trojan", "vless", "http", "snell", "socks5"]
     static height = MultiSelectionForm.getHeight(TypeFilter.types)

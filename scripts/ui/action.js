@@ -67,7 +67,7 @@ class MultiSelectionForm {
                     })
                     .map(item => item.label.text)
 
-                oldDidSelect(sender, indexPath, data, selected)
+                oldDidSelect(sender, indexPath, data, selected ?? [])
             }
         }
 
@@ -166,15 +166,15 @@ class Action {
     /**
      *
      * @param {string} key
-     * @param {*} value
+     * @param {*} args
      */
-    set(sender, value) {
+    set(sender, args) {
         const p = this.#getListInfoPointer(sender)
 
         if (p) {
             const rowInfo = p.info
             const listInfo = $(Editor.listId).info
-            listInfo.process[rowInfo.uuid].args = value
+            listInfo.process[rowInfo.uuid].args = args
             $(Editor.listId).info = listInfo
         }
     }
@@ -185,7 +185,14 @@ class Action {
         if (p) {
             const rowInfo = p.info
             const listInfo = $(Editor.listId).info
-            return listInfo.process[rowInfo?.uuid]?.args ?? _default
+            const args = listInfo.process[rowInfo?.uuid]?.args
+            if (Array.isArray(args) && args.length === 0) {
+                return _default
+            }
+            if (typeof args === "object" && Object.keys(args).length === 0) {
+                return _default
+            }
+            return args ?? _default
         }
 
         return _default
