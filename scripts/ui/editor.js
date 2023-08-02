@@ -37,7 +37,6 @@ class Editor {
             userData: this.editorData
         })
         this.setting.footer = {}
-        this.setting.loadConfig()
 
         this.editorData = this.setting.setting
     }
@@ -448,9 +447,9 @@ class SubscriptionEditor extends NodeEditor {
     set(key, value) {
         if (key === "source") {
             if (value === SubscriptionEditor.Source.remote) {
-                $(this.setting.getId("url&content")).views[0].views[1].text = $l10n("URL")
+                $(this.setting.getItem("url&content").id).views[0].views[1].text = $l10n("URL")
             } else {
-                $(this.setting.getId("url&content")).views[0].views[1].text = $l10n("CONTENT")
+                $(this.setting.getItem("url&content").id).views[0].views[1].text = $l10n("CONTENT")
             }
             this.editorData["source"] = SubscriptionEditor.SourceValue(value)
         } else {
@@ -681,7 +680,7 @@ class ArtifactEditor extends Editor {
 
         if (key === "type") {
             // 更改 type 时清空 source
-            $(this.setting.getId("source") + "-label").text = ""
+            $(this.setting.getItem("source").id + "-label").text = ""
             super.set("source", "")
         }
 
