@@ -10,7 +10,6 @@ class AppKernel extends Kernel {
     constructor() {
         super()
         this.setting = new Setting()
-        this.setting.loadConfig()
         this.initSettingMethods()
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
