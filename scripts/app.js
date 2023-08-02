@@ -25,22 +25,6 @@ class AppKernel extends Kernel {
         return this.setting.get("advanced.api", "https://sub.store")
     }
 
-    deleteConfirm(message, conformAction) {
-        $ui.alert({
-            title: message,
-            actions: [
-                {
-                    title: $l10n("DELETE"),
-                    style: $alertActionType.destructive,
-                    handler: () => {
-                        conformAction()
-                    }
-                },
-                { title: $l10n("CANCEL") }
-            ]
-        })
-    }
-
     initComponents() {
         this.api = new SubStore(this.host)
         this.tabBarController = new TabBarController()

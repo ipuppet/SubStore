@@ -96,8 +96,8 @@ class HomeUI {
                 const cell = list.cell($indexPath(0, index))
                 cell.get("expire").text =
                     $l10n("EXPIRE") + ": " + new Date(Number(resp.expire) * 1000).toLocaleDateString()
-                const usage = Kernel.bytesToSize(Number(resp.upload) + Number(resp.download))
-                const total = Kernel.bytesToSize(resp.total)
+                const usage = UIKit.bytesToSize(Number(resp.upload) + Number(resp.download))
+                const total = UIKit.bytesToSize(resp.total)
                 cell.get("usage").text = $l10n("USAGE") + ": " + `${usage} / ${total}`
             })
         } catch (error) {
@@ -121,7 +121,7 @@ class HomeUI {
     }
 
     deleteSubscription(name, isSubs) {
-        this.kernel.deleteConfirm(`Are you sure you want to delete ${name}?`, async () => {
+        UIKit.deleteConfirm(`Are you sure you want to delete ${name}?`, async () => {
             try {
                 if (isSubs) {
                     await this.kernel.api.deleteSubscription(name)

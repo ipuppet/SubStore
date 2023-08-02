@@ -85,7 +85,7 @@ class SyncUI {
     }
 
     deleteArtifact(name) {
-        this.kernel.deleteConfirm(`Are you sure you want to delete ${name}?`, async () => {
+        UIKit.deleteConfirm(`Are you sure you want to delete ${name}?`, async () => {
             try {
                 await this.kernel.api.deleteArtifact(name)
                 this.init()
