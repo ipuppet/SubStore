@@ -240,7 +240,7 @@ class NodeEditor extends Editor {
                         title: "DISPLAY_NAME",
                         type: "input",
                         key: "display-name",
-                        value: this.editorData.name
+                        value: ""
                     },
                     {
                         icon: ["photo", "#9966FF"],
