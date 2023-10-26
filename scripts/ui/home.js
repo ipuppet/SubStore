@@ -379,6 +379,7 @@ class HomeUI {
         return {
             type: "list",
             props: {
+                stickyHeader: false,
                 id: this.listId,
                 rowHeight: this.rowHeight,
                 data: this.subscriptions,
