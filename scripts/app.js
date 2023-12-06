@@ -47,7 +47,7 @@ class AppKernel extends Kernel {
                                 $ui.alert($l10n("EXPORT_ERROR"))
                                 animate.cancel()
                             } else {
-                                const data = JSON.parse(resp.data)
+                                const data = typeof resp.data === "string" ? resp.data : JSON.stringify(resp.data)
                                 switch (idx) {
                                     case 0:
                                         $drive.save({
