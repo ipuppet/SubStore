@@ -150,7 +150,7 @@ class AppKernel extends Kernel {
                                                 animate.done()
                                                 // 重新启动
                                                 setTimeout(() => {
-                                                    //$addin.restart()
+                                                    $addin.restart()
                                                 }, 1000)
                                             }
                                         }
