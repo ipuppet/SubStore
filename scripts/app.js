@@ -93,6 +93,7 @@ class AppKernel extends Kernel {
                     }
                     let message = ""
                     const keyL10n = {
+                        schemaVersion: "Schema Version",
                         subs: "单个订阅",
                         collections: "组合订阅",
                         artifacts: "同步配置",
@@ -101,15 +102,18 @@ class AppKernel extends Kernel {
                     }
                     try {
                         if (data.schemaVersion === "2.0") {
+                            message += keyL10n.schemaVersion + ": " + data.schemaVersion
                             Object.keys(data).forEach(key => {
+                                if (!keyL10n[key]) return
                                 if (Array.isArray(data[key])) {
+                                    if (data[key].length === 0) return
                                     message += `\n\n${keyL10n[key]}:\n`
                                     message += data[key].map(v => v.name).join("\n")
                                 } else if (typeof data[key] === "object") {
+                                    const keys = Object.keys(data[key])
+                                    if (keys.length === 0) return
                                     message += `\n\n${keyL10n[key]}:\n`
-                                    message += Object.keys(data[key])
-                                        .map(k => `${k}: ${data[key][k]}`)
-                                        .join("\n")
+                                    message += keys.map(k => `${k}: ${data[key][k]}`).join("\n")
                                 }
                             })
                         } else {
@@ -133,10 +137,9 @@ class AppKernel extends Kernel {
                                     $http.post({
                                         url: `${this.host}/api/storage`,
                                         header: { "Content-Type": "application/json" },
-                                        body: data,
+                                        body: { content: JSON.stringify(data) },
                                         handler: resp => {
                                             if (resp.error) {
-                                                console.log(resp.error)
                                                 $ui.alert({
                                                     title: $l10n("IMPORT_ERROR"),
                                                     message: resp.error.localizedDescription
@@ -147,7 +150,7 @@ class AppKernel extends Kernel {
                                                 animate.done()
                                                 // 重新启动
                                                 setTimeout(() => {
-                                                    $addin.restart()
+                                                    //$addin.restart()
                                                 }, 1000)
                                             }
                                         }
