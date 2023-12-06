@@ -1,4 +1,4 @@
-const { Kernel, TabBarController, NavigationBar, Setting } = require("./libs/easy-jsbox")
+const { Kernel, Logger, TabBarController, FileStorage, NavigationBar, Setting } = require("./libs/easy-jsbox")
 const { SubStore } = require("./libs/api")
 const HomeUI = require("./ui/home")
 const SyncUI = require("./ui/sync")
@@ -7,9 +7,23 @@ const SyncUI = require("./ui/sync")
  * @typedef {AppKernel} AppKernel
  */
 class AppKernel extends Kernel {
+    static fileStorage = new FileStorage({
+        basePath: "shared://substore"
+    })
+
+    logPath = "logs"
+    logFile = "substore.log"
+    logFilePath = FileStorage.join(this.logPath, this.logFile)
+
     constructor() {
         super()
-        this.setting = new Setting()
+        this.fileStorage = AppKernel.fileStorage
+        this.logger = new Logger()
+        this.logger.setWriter(this.fileStorage, this.logFilePath)
+        this.setting = new Setting({
+            logger: this.logger,
+            fileStorage: this.fileStorage
+        })
         this.initSettingMethods()
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
@@ -274,8 +288,18 @@ class AppUI {
     }
 }
 
+function compatibility() {
+    if ($file.isDirectory("storage")) {
+        $file.move({
+            src: "storage",
+            dst: "shared://substore"
+        })
+    }
+}
+
 module.exports = {
     run: () => {
+        compatibility()
         if ($app.env === $env.app || $app.env === $env.today) {
             AppUI.renderMainUI()
         } else {
