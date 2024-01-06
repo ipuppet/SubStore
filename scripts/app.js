@@ -24,6 +24,7 @@ class AppKernel extends Kernel {
             logger: this.logger,
             fileStorage: this.fileStorage
         })
+        this.setting.setFooter(this.settingFooter)
         this.initSettingMethods()
         // 备份路径
         this.backupPath = "drive://SubStore/backup.json"
@@ -32,6 +33,49 @@ class AppKernel extends Kernel {
             $file.mkdir("drive://SubStore/")
         }
         this.initComponents()
+    }
+
+    get settingFooter() {
+        const views = []
+
+        let info = FileStorage.readFromRootAsJSON("config.json", {})["info"] ?? {}
+        if (!info.version || !info.author) {
+            try {
+                info = __INFO__
+            } catch {}
+        }
+        if (info.version && info.author) {
+            views.push({
+                type: "label",
+                props: {
+                    font: $font(14),
+                    text: `${$l10n("VERSION")} ${info.version} ♥ ${info.author}`,
+                    textColor: $color({
+                        light: "#C0C0C0",
+                        dark: "#545454"
+                    }),
+                    lines: 0,
+                    align: $align.center
+                },
+                layout: make => {
+                    make.left.right.inset(0)
+                    make.top.inset(10)
+                },
+                events: {
+                    ready: async sender => {
+                        const env = (await this.api.getEnv()) ?? {}
+                        sender.text = sender.text + "\n" + `Backend: ${env?.backend} ${env?.version}`
+                        console.log(sender.text)
+                    }
+                }
+            })
+        }
+
+        return {
+            type: "view",
+            props: { height: 70 },
+            views: views
+        }
     }
 
     get host() {

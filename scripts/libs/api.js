@@ -54,6 +54,10 @@ class SubStore extends Request {
         return infoObj
     }
 
+    async getEnv() {
+        return await this.requestWithBaseURL("/api/utils/env", Request.method.get)
+    }
+
     async getSubscriptions() {
         return await this.requestWithBaseURL("/api/subs", Request.method.get)
     }
