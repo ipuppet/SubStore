@@ -409,8 +409,19 @@ class HomeUI {
                             await this.init()
                         }
 
-                        const preview = await this.kernel.api.preview(fromServer, type)
-                        this.preview(info.name, preview.original, preview.processed)
+                        try {
+                            const preview = await this.kernel.api.preview(fromServer, type)
+                            this.preview(info.name, preview.original, preview.processed)
+                        } catch (error) {
+                            try {
+                                $ui.alert({
+                                    title: error.message,
+                                    message: error.details
+                                })
+                            } catch (error) {
+                                $ui.alert(error)
+                            }
+                        }
                     } catch (error) {
                         this.kernel.print(error)
                         $ui.alert(error)

@@ -22,8 +22,13 @@ class SubStore extends Request {
             }
             return resp.data.data
         } catch (error) {
-            console.error("error url: " + url)
-            throw error
+            console.error(error)
+            try {
+                const message = JSON.parse(error.message)
+                throw message.error
+            } catch (error) {
+                throw error
+            }
         }
     }
 
