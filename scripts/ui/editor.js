@@ -496,6 +496,10 @@ class SubscriptionEditor extends NodeEditor {
         delete this.editorData["url&content"]
 
         const data = super.getData()
+        if (data.name === "") {
+            throw "Name cannot be empty"
+        }
+
         if (this.isNew) {
             await this.kernel.api.addSubscription(data)
         } else {
@@ -620,6 +624,9 @@ class CollectionEditor extends NodeEditor {
     async save() {
         delete this.editorData["subscriptionSelect"]
         const data = super.getData()
+        if (data.name === "") {
+            throw "Name cannot be empty"
+        }
 
         if (this.isNew) {
             await this.kernel.api.addCollection(data)
