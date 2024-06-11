@@ -60,6 +60,7 @@
 "PLATFORM" = "平台";
 
 "FlagOperator" = "国旗";
+"work-mode" = "工作模式";
 "ASCENDING" = "升序";
 "DESCENDING" = "降序";
 "RANDOM" = "随机";

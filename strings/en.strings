@@ -60,6 +60,7 @@
 "PLATFORM" = "Platform";
 
 "FlagOperator" = "Flags Options";
+"work-mode" = "Work Mode";
 "ASCENDING" = "Ascending";
 "DESCENDING" = "Descending";
 "RANDOM" = "Random";
