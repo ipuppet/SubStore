@@ -82,7 +82,6 @@
                 "icon": ["book.fill", "#A569BD"],
                 "title": "README",
                 "type": "script",
-                "key": "about.readme",
                 "value": "this.method.readme"
             }
         ]
