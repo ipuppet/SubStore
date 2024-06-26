@@ -9,10 +9,7 @@
                     {
                         "items": [
                             {
-                                "icon": [
-                                    "arrow.triangle.2.circlepath",
-                                    "#FF9900"
-                                ],
+                                "icon": ["arrow.triangle.2.circlepath", "#FF9900"],
                                 "title": "HIDE_SYNC_TAB",
                                 "type": "switch",
                                 "key": "ui.sync",
@@ -28,10 +25,7 @@
         "title": "ADVANCED",
         "items": [
             {
-                "icon": [
-                    "location.fill",
-                    "#FF9900"
-                ],
+                "icon": ["location.fill", "#FF9900"],
                 "title": "API",
                 "type": "input",
                 "key": "advanced.api",
@@ -42,19 +36,14 @@
     {
         "items": [
             {
-                "icon": [
-                    "icloud.and.arrow.up.fill"
-                ],
+                "icon": ["icloud.and.arrow.up.fill"],
                 "title": "EXPORT",
                 "type": "script",
                 "key": "backup.backup",
                 "value": "this.method.export"
             },
             {
-                "icon": [
-                    "arrow.clockwise.icloud.fill",
-                    "#FFCC33"
-                ],
+                "icon": ["arrow.clockwise.icloud.fill", "#FFCC33"],
                 "title": "IMPORT",
                 "type": "script",
                 "key": "backup.recover",
@@ -66,49 +55,33 @@
         "title": "ABOUT",
         "items": [
             {
-                "icon": [
-                    "/assets/icon/Sub-Store.png",
-                    "white"
-                ],
+                "icon": ["/assets/icon/Sub-Store.png", "white"],
                 "title": "SUBSTORE",
                 "type": "info",
                 "key": "about.substore",
-                "value": [
-                    "Peng-YM/Sub-Store",
-                    "https://github.com/Peng-YM/Sub-Store"
-                ]
+                "value": ["Peng-YM/Sub-Store", "https://github.com/Peng-YM/Sub-Store"]
             },
             {
-                "icon": [
-                    "/assets/icon/github.com.jpeg",
-                    "white"
-                ],
+                "icon": ["icon_177", "black"],
                 "title": "Github",
                 "type": "info",
                 "key": "about.github",
-                "value": [
-                    "ipuppet/SubStore",
-                    "https://github.com/ipuppet/SubStore"
-                ]
+                "value": ["ipuppet/SubStore", "https://github.com/ipuppet/SubStore"]
             },
             {
-                "icon": [
-                    "person.fill",
-                    "#FF9900"
-                ],
+                "icon": ["icon_172", "#1888bf"],
+                "title": "Telegram",
+                "type": "info",
+                "value": ["JSBoxTG", "https://t.me/JSBoxTG"]
+            },
+            {
+                "icon": ["person.fill", "#FF9900"],
                 "title": "AUTHOR",
                 "type": "info",
-                "key": "about.author",
-                "value": [
-                    "ipuppet",
-                    "https://blog.ultagic.com"
-                ]
+                "value": ["ipuppet", "https://blog.ultagic.com"]
             },
             {
-                "icon": [
-                    "book.fill",
-                    "#A569BD"
-                ],
+                "icon": ["book.fill", "#A569BD"],
                 "title": "README",
                 "type": "script",
                 "key": "about.readme",
