@@ -58,14 +58,12 @@
                 "icon": ["/assets/icon/Sub-Store.png", "white"],
                 "title": "SUBSTORE",
                 "type": "info",
-                "key": "about.substore",
                 "value": ["Peng-YM/Sub-Store", "https://github.com/Peng-YM/Sub-Store"]
             },
             {
                 "icon": ["icon_177", "black"],
                 "title": "Github",
                 "type": "info",
-                "key": "about.github",
                 "value": ["ipuppet/SubStore", "https://github.com/ipuppet/SubStore"]
             },
             {
