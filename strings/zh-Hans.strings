@@ -39,6 +39,7 @@
 "LOCAL" = "本地";
 "CONTENT" = "内容";
 "UA" = "User-Agent";
+"ignoreFailedRemoteSub" = "忽略失败的远程订阅";
 
 "COMMON_SETTINGS" = "通用设置";
 "RETAIN" = "保留";

@@ -609,6 +609,12 @@ class CollectionEditor extends NodeEditor {
     get settingStructure() {
         const settingStructure = super.settingStructure
         settingStructure[0].items.push({
+            icon: ["person.crop.circle", "#000000"],
+            title: "ignoreFailedRemoteSub",
+            type: "switch",
+            key: "ignoreFailedRemoteSub"
+        })
+        settingStructure[0].items.push({
             icon: ["link", "#FF99CC"],
             title: $l10n("SUBSCRIPTION"),
             type: "script",

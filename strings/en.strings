@@ -39,6 +39,7 @@
 "LOCAL" = "Local";
 "CONTENT" = "Content";
 "UA" = "User-Agent";
+"ignoreFailedRemoteSub" = "Ignore Failed Subs";
 
 "COMMON_SETTINGS" = "Common Settings";
 "RETAIN" = "Retain";
